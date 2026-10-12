@@ -43,7 +43,22 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
       deadline,
       priority,
       status: 'Pending',
-      createdAt: 'Just now',
+      createdAt: 'Today, Oct 12',
+      history: [
+        {
+          id: `h-${Date.now()}-1`,
+          action: 'Task created',
+          actor: `${currentUser.name} (${currentUser.role.split('&')[0].trim()})`,
+          timestamp: 'Just now',
+        },
+        {
+          id: `h-${Date.now()}-2`,
+          action: `Assigned to ${assignedTo}`,
+          actor: currentUser.name,
+          timestamp: 'Just now',
+          note: `Assigned in ${department} Department with ${priority} priority`,
+        },
+      ],
     };
 
     onAddTask(newTask);

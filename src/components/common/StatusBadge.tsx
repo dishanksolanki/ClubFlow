@@ -24,6 +24,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, size = 'md' })
         return 'bg-emerald-50 text-emerald-700 border-emerald-200';
       case 'Overdue':
       case 'Absent':
+      case 'Rejected':
         return 'bg-rose-50 text-rose-700 border-rose-200';
 
       // Priorities

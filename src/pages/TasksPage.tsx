@@ -6,51 +6,125 @@ import {
   Kanban,
   Clock,
   User,
+  ArrowUpDown,
+  Filter,
+  Eye,
+  Calendar,
 } from 'lucide-react';
-import { DepartmentType, Member, Task, TaskStatus } from '../types';
+import { DepartmentType, Member, Task, TaskPriority, TaskStatus } from '../types';
 import { StatusBadge } from '../components/common/StatusBadge';
 import { Avatar } from '../components/common/Avatar';
+import { TaskDetailModal } from '../components/modals/TaskDetailModal';
 
 interface TasksPageProps {
   tasks: Task[];
   onUpdateTaskStatus: (taskId: string, newStatus: TaskStatus) => void;
+  onUpdateTask: (updatedTask: Task) => void;
   onOpenCreateTask: () => void;
   departments: DepartmentType[];
   members: Member[];
+  currentUser: Member;
 }
 
 export const TasksPage: React.FC<TasksPageProps> = ({
   tasks,
   onUpdateTaskStatus,
+  onUpdateTask,
   onOpenCreateTask,
   departments,
+  currentUser,
 }) => {
   const [viewMode, setViewMode] = useState<'list' | 'kanban'>('list');
   const [statusFilter, setStatusFilter] = useState<string>('All');
   const [deptFilter, setDeptFilter] = useState<string>('All');
+  const [priorityFilter, setPriorityFilter] = useState<string>('All');
+  const [sortOption, setSortOption] = useState<string>('deadline-asc');
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Task details modal state
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
   const allStatuses: TaskStatus[] = [
     'Pending',
     'In Progress',
     'Submitted',
     'Approved',
+    'Rejected',
     'Completed',
     'Overdue',
   ];
 
+  const allPriorities: TaskPriority[] = ['Low', 'Medium', 'High', 'Urgent'];
+
+  // Priority weight for sorting
+  const priorityWeight: Record<TaskPriority, number> = {
+    Urgent: 4,
+    High: 3,
+    Medium: 2,
+    Low: 1,
+  };
+
+  // Helper to parse dates for sorting
+  const parseDeadlineToScore = (deadlineStr: string) => {
+    const lower = deadlineStr.toLowerCase();
+    if (lower.includes('yesterday')) return -1;
+    if (lower.includes('today')) return 0;
+    if (lower.includes('tomorrow')) return 1;
+
+    // Try parsing standard dates like "Oct 15, 2026" or "Oct 04, 2026"
+    const parsed = Date.parse(deadlineStr);
+    if (!isNaN(parsed)) return parsed;
+
+    // Fallback: search for day number
+    const match = deadlineStr.match(/\d+/);
+    if (match) return parseInt(match[0], 10);
+    return 999;
+  };
+
+  // Filtering
   const filteredTasks = tasks.filter((t) => {
     if (statusFilter !== 'All' && t.status !== statusFilter) return false;
     if (deptFilter !== 'All' && t.department !== deptFilter) return false;
+    if (priorityFilter !== 'All' && t.priority !== priorityFilter) return false;
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       const matchTitle = t.title.toLowerCase().includes(q);
       const matchAssignee = t.assignedTo.toLowerCase().includes(q);
       const matchAssigner = t.assignedBy.toLowerCase().includes(q);
-      if (!matchTitle && !matchAssignee && !matchAssigner) return false;
+      const matchDept = t.department.toLowerCase().includes(q);
+      if (!matchTitle && !matchAssignee && !matchAssigner && !matchDept) return false;
     }
     return true;
   });
+
+  // Sorting
+  const sortedTasks = [...filteredTasks].sort((a, b) => {
+    if (sortOption === 'deadline-asc') {
+      return parseDeadlineToScore(a.deadline) - parseDeadlineToScore(b.deadline);
+    }
+    if (sortOption === 'deadline-desc') {
+      return parseDeadlineToScore(b.deadline) - parseDeadlineToScore(a.deadline);
+    }
+    if (sortOption === 'priority-desc') {
+      return priorityWeight[b.priority] - priorityWeight[a.priority];
+    }
+    if (sortOption === 'priority-asc') {
+      return priorityWeight[a.priority] - priorityWeight[b.priority];
+    }
+    if (sortOption === 'created-desc') {
+      return b.createdAt.localeCompare(a.createdAt);
+    }
+    return 0;
+  });
+
+  const handleOpenTaskDetail = (task: Task) => {
+    setSelectedTask(task);
+  };
+
+  const handleTaskModalUpdate = (updatedTask: Task) => {
+    onUpdateTask(updatedTask);
+    setSelectedTask(updatedTask);
+  };
 
   return (
     <div className="space-y-6">
@@ -61,10 +135,11 @@ export const TasksPage: React.FC<TasksPageProps> = ({
             Department Tasks
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Track operational assignments, deliverables, and submissions across committees.
+            Track club assignments, deadlines, deliverables, and submissions across committees.
           </p>
         </div>
-        <div className="flex items-center gap-2">
+
+        <div className="flex items-center gap-2 self-start sm:self-auto">
           {/* View Mode Toggle */}
           <div className="flex items-center bg-slate-100 p-1 rounded-lg">
             <button
@@ -99,54 +174,116 @@ export const TasksPage: React.FC<TasksPageProps> = ({
             className="px-4 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors flex items-center gap-1.5 shadow-2xs"
           >
             <Plus className="w-4 h-4" />
-            <span>Create Task</span>
+            <span>Add Task</span>
           </button>
         </div>
       </div>
 
-      {/* Filter and Search Bar */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200/90 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-2.5">
-          {/* Department Filter */}
-          <select
-            value={deptFilter}
-            onChange={(e) => setDeptFilter(e.target.value)}
-            className="px-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-700 focus:outline-hidden focus:ring-1 focus:ring-indigo-500 font-medium"
-          >
-            <option value="All">All Departments</option>
-            {departments.map((d) => (
-              <option key={d} value={d}>
-                {d}
-              </option>
-            ))}
-          </select>
+      {/* Filter, Search, and Sort Bar */}
+      <div className="bg-white p-4 rounded-xl border border-slate-200/90 shadow-2xs space-y-3">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+          {/* Filters Row */}
+          <div className="flex flex-wrap items-center gap-2.5">
+            {/* Status Filter */}
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs text-slate-400 font-medium hidden sm:inline">Status:</span>
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-700 focus:outline-hidden focus:ring-1 focus:ring-indigo-500 font-medium"
+              >
+                <option value="All">All Statuses ({tasks.length})</option>
+                {allStatuses.map((st) => (
+                  <option key={st} value={st}>
+                    {st} ({tasks.filter((t) => t.status === st).length})
+                  </option>
+                ))}
+              </select>
+            </div>
 
-          {/* Status Filter */}
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-700 focus:outline-hidden focus:ring-1 focus:ring-indigo-500 font-medium"
-          >
-            <option value="All">All Statuses</option>
-            {allStatuses.map((st) => (
-              <option key={st} value={st}>
-                {st}
-              </option>
-            ))}
-          </select>
+            {/* Department Filter */}
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs text-slate-400 font-medium hidden sm:inline">Dept:</span>
+              <select
+                value={deptFilter}
+                onChange={(e) => setDeptFilter(e.target.value)}
+                className="px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-700 focus:outline-hidden focus:ring-1 focus:ring-indigo-500 font-medium"
+              >
+                <option value="All">All Departments</option>
+                {departments.map((d) => (
+                  <option key={d} value={d}>
+                    {d}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Priority Filter */}
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs text-slate-400 font-medium hidden sm:inline">Priority:</span>
+              <select
+                value={priorityFilter}
+                onChange={(e) => setPriorityFilter(e.target.value)}
+                className="px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-700 focus:outline-hidden focus:ring-1 focus:ring-indigo-500 font-medium"
+              >
+                <option value="All">All Priorities</option>
+                {allPriorities.map((p) => (
+                  <option key={p} value={p}>
+                    {p}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Sort by Deadline / Priority */}
+            <div className="flex items-center gap-1.5">
+              <ArrowUpDown className="w-3.5 h-3.5 text-slate-400" />
+              <select
+                value={sortOption}
+                onChange={(e) => setSortOption(e.target.value)}
+                className="px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-700 focus:outline-hidden focus:ring-1 focus:ring-indigo-500 font-medium"
+              >
+                <option value="deadline-asc">Sort: Deadline (Earliest)</option>
+                <option value="deadline-desc">Sort: Deadline (Latest)</option>
+                <option value="priority-desc">Sort: Priority (Highest)</option>
+                <option value="priority-asc">Sort: Priority (Lowest)</option>
+                <option value="created-desc">Sort: Recently Created</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Search Box */}
+          <div className="relative w-full lg:w-72">
+            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              placeholder="Search tasks, title, assignee..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-hidden focus:ring-1 focus:ring-indigo-500"
+            />
+          </div>
         </div>
 
-        {/* Search */}
-        <div className="relative w-full md:w-72">
-          <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            placeholder="Search tasks, assignee..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-hidden focus:ring-1 focus:ring-indigo-500"
-          />
-        </div>
+        {/* Active Filter Indicators */}
+        {(statusFilter !== 'All' || deptFilter !== 'All' || priorityFilter !== 'All' || searchQuery) && (
+          <div className="flex items-center gap-2 pt-2 border-t border-slate-100 text-xs text-slate-500">
+            <span>Showing {sortedTasks.length} of {tasks.length} tasks</span>
+            <span>·</span>
+            <button
+              type="button"
+              onClick={() => {
+                setStatusFilter('All');
+                setDeptFilter('All');
+                setPriorityFilter('All');
+                setSearchQuery('');
+              }}
+              className="text-indigo-600 hover:text-indigo-800 font-medium"
+            >
+              Reset filters
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Render Table List View */}
@@ -156,28 +293,36 @@ export const TasksPage: React.FC<TasksPageProps> = ({
             <table className="w-full text-left text-xs border-collapse">
               <thead>
                 <tr className="bg-slate-50/80 border-b border-slate-200/80 text-slate-500 font-semibold uppercase tracking-wider text-[11px]">
-                  <th className="py-3 px-4">Task</th>
+                  <th className="py-3 px-4">Task Title</th>
                   <th className="py-3 px-4">Department</th>
                   <th className="py-3 px-4">Assigned To</th>
                   <th className="py-3 px-4">Assigned By</th>
+                  <th className="py-3 px-4">Created Date</th>
                   <th className="py-3 px-4">Deadline</th>
                   <th className="py-3 px-4">Priority</th>
-                  <th className="py-3 px-4">Status & Action</th>
+                  <th className="py-3 px-4">Status</th>
+                  <th className="py-3 px-4 text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {filteredTasks.length === 0 ? (
+                {sortedTasks.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="py-10 text-center text-slate-400">
-                      No matching tasks found.
+                    <td colSpan={9} className="py-12 text-center text-slate-400">
+                      No matching tasks found. Try adjusting your filters.
                     </td>
                   </tr>
                 ) : (
-                  filteredTasks.map((t) => (
-                    <tr key={t.id} className="hover:bg-slate-50/70 transition-colors">
-                      {/* Title & Description */}
-                      <td className="py-3.5 px-4 min-w-[240px]">
-                        <p className="font-semibold text-slate-900">{t.title}</p>
+                  sortedTasks.map((t) => (
+                    <tr
+                      key={t.id}
+                      onClick={() => handleOpenTaskDetail(t)}
+                      className="hover:bg-slate-50/70 transition-colors cursor-pointer group"
+                    >
+                      {/* Task Title & Description snippet */}
+                      <td className="py-3.5 px-4 min-w-[220px]">
+                        <p className="font-semibold text-slate-900 group-hover:text-indigo-600 transition-colors">
+                          {t.title}
+                        </p>
                         <p className="text-[11px] text-slate-500 mt-0.5 line-clamp-1">
                           {t.description}
                         </p>
@@ -205,8 +350,13 @@ export const TasksPage: React.FC<TasksPageProps> = ({
                         {t.assignedBy}
                       </td>
 
+                      {/* Created Date */}
+                      <td className="py-3.5 px-4 whitespace-nowrap font-mono text-slate-500 text-[11px]">
+                        {t.createdAt}
+                      </td>
+
                       {/* Deadline */}
-                      <td className="py-3.5 px-4 whitespace-nowrap font-mono text-slate-700">
+                      <td className="py-3.5 px-4 whitespace-nowrap font-mono text-slate-800 font-medium">
                         {t.deadline}
                       </td>
 
@@ -215,21 +365,40 @@ export const TasksPage: React.FC<TasksPageProps> = ({
                         <StatusBadge status={t.priority} size="sm" />
                       </td>
 
-                      {/* Status / Interactive Changer */}
+                      {/* Status */}
                       <td className="py-3.5 px-4 whitespace-nowrap">
-                        <select
-                          value={t.status}
-                          onChange={(e) =>
-                            onUpdateTaskStatus(t.id, e.target.value as TaskStatus)
-                          }
-                          className="text-xs font-semibold px-2 py-1 rounded-md border border-slate-200 bg-white hover:border-slate-300 focus:outline-hidden focus:ring-1 focus:ring-indigo-500 text-slate-800 cursor-pointer"
-                        >
-                          {allStatuses.map((st) => (
-                            <option key={st} value={st}>
-                              {st}
-                            </option>
-                          ))}
-                        </select>
+                        <StatusBadge status={t.status} size="sm" />
+                      </td>
+
+                      {/* Action / View details */}
+                      <td
+                        className="py-3.5 px-4 whitespace-nowrap text-right"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <div className="flex items-center justify-end gap-2">
+                          <select
+                            value={t.status}
+                            onChange={(e) =>
+                              onUpdateTaskStatus(t.id, e.target.value as TaskStatus)
+                            }
+                            className="text-[11px] font-semibold px-2 py-1 rounded-md border border-slate-200 bg-white hover:border-slate-300 focus:outline-hidden focus:ring-1 focus:ring-indigo-500 text-slate-800 cursor-pointer"
+                          >
+                            {allStatuses.map((st) => (
+                              <option key={st} value={st}>
+                                {st}
+                              </option>
+                            ))}
+                          </select>
+
+                          <button
+                            type="button"
+                            onClick={() => handleOpenTaskDetail(t)}
+                            title="View task details"
+                            className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-slate-100 rounded-md transition-colors"
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))
@@ -239,14 +408,14 @@ export const TasksPage: React.FC<TasksPageProps> = ({
           </div>
         </div>
       ) : (
-        /* Render Kanban Board View */
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3.5 items-start">
+        /* Render Kanban Board View with all 7 statuses */
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-3.5 items-start">
           {allStatuses.map((status) => {
-            const columnTasks = filteredTasks.filter((t) => t.status === status);
+            const columnTasks = sortedTasks.filter((t) => t.status === status);
             return (
               <div
                 key={status}
-                className="bg-slate-50/90 rounded-xl border border-slate-200 p-3 min-h-[350px] flex flex-col"
+                className="bg-slate-50/90 rounded-xl border border-slate-200 p-3 min-h-[380px] flex flex-col"
               >
                 <div className="flex items-center justify-between mb-3 px-1">
                   <span className="text-xs font-bold text-slate-800">{status}</span>
@@ -257,14 +426,15 @@ export const TasksPage: React.FC<TasksPageProps> = ({
 
                 <div className="space-y-2.5 flex-1">
                   {columnTasks.length === 0 ? (
-                    <div className="h-24 border border-dashed border-slate-200 rounded-lg flex items-center justify-center text-[11px] text-slate-400">
-                      Empty
+                    <div className="h-28 border border-dashed border-slate-200 rounded-lg flex items-center justify-center text-[11px] text-slate-400">
+                      No tasks
                     </div>
                   ) : (
                     columnTasks.map((t) => (
                       <div
                         key={t.id}
-                        className="bg-white p-3 rounded-lg border border-slate-200 shadow-2xs space-y-2 hover:border-slate-300 transition-colors"
+                        onClick={() => handleOpenTaskDetail(t)}
+                        className="bg-white p-3 rounded-lg border border-slate-200 shadow-2xs space-y-2 hover:border-indigo-300 hover:shadow-xs transition-all cursor-pointer group"
                       >
                         <div className="flex items-center justify-between gap-1">
                           <span className="text-[10px] font-semibold text-slate-500">
@@ -273,7 +443,7 @@ export const TasksPage: React.FC<TasksPageProps> = ({
                           <StatusBadge status={t.priority} size="sm" />
                         </div>
 
-                        <h4 className="text-xs font-bold text-slate-900 leading-snug">
+                        <h4 className="text-xs font-bold text-slate-900 leading-snug group-hover:text-indigo-600 transition-colors">
                           {t.title}
                         </h4>
 
@@ -288,8 +458,12 @@ export const TasksPage: React.FC<TasksPageProps> = ({
                           </div>
                         </div>
 
-                        {/* Quick state cycle */}
-                        <div className="pt-1 flex justify-end">
+                        {/* Quick state changer */}
+                        <div
+                          className="pt-1 flex items-center justify-between"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <span className="text-[10px] text-slate-400">Status:</span>
                           <select
                             value={t.status}
                             onChange={(e) =>
@@ -313,6 +487,15 @@ export const TasksPage: React.FC<TasksPageProps> = ({
           })}
         </div>
       )}
+
+      {/* Task Details Modal View */}
+      <TaskDetailModal
+        task={selectedTask}
+        isOpen={Boolean(selectedTask)}
+        onClose={() => setSelectedTask(null)}
+        currentUser={currentUser}
+        onUpdateTask={handleTaskModalUpdate}
+      />
     </div>
   );
 };

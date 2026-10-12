@@ -77,9 +77,30 @@ export default function App() {
   ];
 
   // Actions
+  const handleUpdateTask = (updatedTask: Task) => {
+    setTasks((prev) =>
+      prev.map((t) => (t.id === updatedTask.id ? updatedTask : t))
+    );
+  };
+
   const handleUpdateTaskStatus = (taskId: string, newStatus: TaskStatus) => {
     setTasks((prev) =>
-      prev.map((t) => (t.id === taskId ? { ...t, status: newStatus } : t))
+      prev.map((t) => {
+        if (t.id === taskId) {
+          const newEvent = {
+            id: `act-${Date.now()}`,
+            action: `Status changed to ${newStatus}`,
+            actor: currentUser.name,
+            timestamp: 'Just now',
+          };
+          return {
+            ...t,
+            status: newStatus,
+            history: [...(t.history || []), newEvent],
+          };
+        }
+        return t;
+      })
     );
   };
 
@@ -156,7 +177,7 @@ export default function App() {
 
   // Pending counts for sidebar badges
   const pendingTasksCount = tasks.filter(
-    (t) => t.status === 'Pending' || t.status === 'In Progress'
+    (t) => t.status === 'Pending' || t.status === 'In Progress' || t.status === 'Rejected'
   ).length;
 
   const unreadAnnouncementsCount = notifications.filter(
@@ -231,9 +252,11 @@ export default function App() {
             <TasksPage
               tasks={tasks}
               onUpdateTaskStatus={handleUpdateTaskStatus}
+              onUpdateTask={handleUpdateTask}
               onOpenCreateTask={() => setIsCreateTaskOpen(true)}
               departments={departmentsList}
               members={members}
+              currentUser={currentUser}
             />
           )}
 

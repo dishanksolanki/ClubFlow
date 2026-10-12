@@ -11,6 +11,7 @@ export type TaskStatus =
   | 'In Progress'
   | 'Submitted'
   | 'Approved'
+  | 'Rejected'
   | 'Completed'
   | 'Overdue';
 
@@ -47,6 +48,23 @@ export interface Member {
   bio?: string;
 }
 
+export interface TaskActivityEvent {
+  id: string;
+  action: string;
+  actor: string;
+  timestamp: string;
+  note?: string;
+}
+
+export interface TaskSubmission {
+  submittedAt: string;
+  submittedBy: string;
+  submissionLink?: string;
+  submissionNotes?: string;
+  reviewComment?: string;
+  reviewStatus?: 'Pending' | 'Approved' | 'Rejected';
+}
+
 export interface Task {
   id: string;
   title: string;
@@ -59,6 +77,8 @@ export interface Task {
   priority: TaskPriority;
   status: TaskStatus;
   createdAt: string;
+  submission?: TaskSubmission;
+  history?: TaskActivityEvent[];
 }
 
 export interface ClubEvent {

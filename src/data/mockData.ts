@@ -443,6 +443,11 @@ export const TASKS: Task[] = [
     priority: 'Urgent',
     status: 'In Progress',
     createdAt: 'Oct 10, 2026',
+    history: [
+      { id: 'h-101-1', action: 'Task created', actor: 'Aryan Mehta (Tech Head)', timestamp: 'Oct 10, 2026, 09:30 AM' },
+      { id: 'h-101-2', action: 'Assigned to Dishank Solanki', actor: 'Aryan Mehta (Tech Head)', timestamp: 'Oct 10, 2026, 09:35 AM' },
+      { id: 'h-101-3', action: 'Work started', actor: 'Dishank Solanki', timestamp: 'Oct 11, 2026, 11:00 AM', note: 'Configured Next.js form schema and API routes' },
+    ],
   },
   {
     id: 'tsk-102',
@@ -455,6 +460,11 @@ export const TASKS: Task[] = [
     priority: 'High',
     status: 'In Progress',
     createdAt: 'Oct 8, 2026',
+    history: [
+      { id: 'h-102-1', action: 'Task created', actor: 'Sophia Vance (President)', timestamp: 'Oct 08, 2026, 10:00 AM' },
+      { id: 'h-102-2', action: 'Assigned to Mira Patel', actor: 'Sophia Vance (President)', timestamp: 'Oct 08, 2026, 10:15 AM' },
+      { id: 'h-102-3', action: 'Work started', actor: 'Mira Patel', timestamp: 'Oct 09, 2026, 02:40 PM', note: 'Created Figma wireframes for 4 sponsorship tier cards' },
+    ],
   },
   {
     id: 'tsk-103',
@@ -467,6 +477,11 @@ export const TASKS: Task[] = [
     priority: 'High',
     status: 'Overdue',
     createdAt: 'Oct 7, 2026',
+    history: [
+      { id: 'h-103-1', action: 'Task created', actor: 'Sophia Vance (President)', timestamp: 'Oct 07, 2026, 11:00 AM' },
+      { id: 'h-103-2', action: 'Assigned to Tanvi Joshi', actor: 'Sophia Vance (President)', timestamp: 'Oct 07, 2026, 11:10 AM' },
+      { id: 'h-103-3', action: 'Marked Overdue', actor: 'System Automation', timestamp: 'Oct 11, 2026, 12:01 PM', note: 'Deadline passed without form submission confirmation' },
+    ],
   },
   {
     id: 'tsk-104',
@@ -479,6 +494,19 @@ export const TASKS: Task[] = [
     priority: 'Medium',
     status: 'Submitted',
     createdAt: 'Oct 9, 2026',
+    submission: {
+      submittedAt: 'Oct 11, 2026, 06:15 PM',
+      submittedBy: 'Zara Khan',
+      submissionLink: 'https://instagram.com/reels/draft-7821',
+      submissionNotes: 'Uploaded 45-second 1080x1920 teaser video with animated speaker bio and RSVP link in bio description.',
+      reviewStatus: 'Pending',
+    },
+    history: [
+      { id: 'h-104-1', action: 'Task created', actor: 'Chloe Lin (VP)', timestamp: 'Oct 09, 2026, 01:20 PM' },
+      { id: 'h-104-2', action: 'Assigned to Zara Khan', actor: 'Chloe Lin (VP)', timestamp: 'Oct 09, 2026, 01:30 PM' },
+      { id: 'h-104-3', action: 'Work started', actor: 'Zara Khan', timestamp: 'Oct 10, 2026, 04:00 PM', note: 'Rendered motion graphics in After Effects' },
+      { id: 'h-104-4', action: 'Deliverable submitted', actor: 'Zara Khan', timestamp: 'Oct 11, 2026, 06:15 PM', note: 'Draft reel ready for executive VP sign-off' },
+    ],
   },
   {
     id: 'tsk-105',
@@ -491,6 +519,10 @@ export const TASKS: Task[] = [
     priority: 'Medium',
     status: 'Pending',
     createdAt: 'Oct 11, 2026',
+    history: [
+      { id: 'h-105-1', action: 'Task created', actor: 'Chloe Lin (VP)', timestamp: 'Oct 11, 2026, 03:00 PM' },
+      { id: 'h-105-2', action: 'Assigned to Pooja Iyer', actor: 'Chloe Lin (VP)', timestamp: 'Oct 11, 2026, 03:15 PM' },
+    ],
   },
   {
     id: 'tsk-106',
@@ -503,6 +535,10 @@ export const TASKS: Task[] = [
     priority: 'Low',
     status: 'Pending',
     createdAt: 'Oct 11, 2026',
+    history: [
+      { id: 'h-106-1', action: 'Task created', actor: 'Sophia Vance (President)', timestamp: 'Oct 11, 2026, 04:30 PM' },
+      { id: 'h-106-2', action: 'Assigned to Neil Fernandez', actor: 'Sophia Vance (President)', timestamp: 'Oct 11, 2026, 04:45 PM' },
+    ],
   },
   {
     id: 'tsk-107',
@@ -515,6 +551,21 @@ export const TASKS: Task[] = [
     priority: 'Medium',
     status: 'Approved',
     createdAt: 'Oct 6, 2026',
+    submission: {
+      submittedAt: 'Oct 09, 2026, 08:30 PM',
+      submittedBy: 'Karan Sharma',
+      submissionLink: 'https://github.com/clubflow/portal/pull/42',
+      submissionNotes: 'Implemented in-memory Redis session caching layer and benchmarked 100 concurrent mock check-ins.',
+      reviewComment: 'Approved by Aryan Mehta. Latency tests passed at 68ms average response time.',
+      reviewStatus: 'Approved',
+    },
+    history: [
+      { id: 'h-107-1', action: 'Task created', actor: 'Aryan Mehta (Tech Head)', timestamp: 'Oct 06, 2026, 11:00 AM' },
+      { id: 'h-107-2', action: 'Assigned to Karan Sharma', actor: 'Aryan Mehta (Tech Head)', timestamp: 'Oct 06, 2026, 11:15 AM' },
+      { id: 'h-107-3', action: 'Work started', actor: 'Karan Sharma', timestamp: 'Oct 07, 2026, 01:00 PM', note: 'Created branch feat/cache-opt and benchmarks' },
+      { id: 'h-107-4', action: 'Deliverable submitted', actor: 'Karan Sharma', timestamp: 'Oct 09, 2026, 08:30 PM', note: 'Submitted GitHub PR #42' },
+      { id: 'h-107-5', action: 'Reviewed and Approved', actor: 'Aryan Mehta (Tech Head)', timestamp: 'Oct 10, 2026, 10:00 AM', note: 'Ready for production deployment' },
+    ],
   },
   {
     id: 'tsk-108',
@@ -527,6 +578,11 @@ export const TASKS: Task[] = [
     priority: 'High',
     status: 'In Progress',
     createdAt: 'Oct 10, 2026',
+    history: [
+      { id: 'h-108-1', action: 'Task created', actor: 'Tanvi Joshi (Event Head)', timestamp: 'Oct 10, 2026, 02:00 PM' },
+      { id: 'h-108-2', action: 'Assigned to Aditya Nair', actor: 'Tanvi Joshi (Event Head)', timestamp: 'Oct 10, 2026, 02:15 PM' },
+      { id: 'h-108-3', action: 'Work started', actor: 'Aditya Nair', timestamp: 'Oct 11, 2026, 09:30 AM', note: 'Received vendor sample fabric swatch' },
+    ],
   },
   {
     id: 'tsk-109',
@@ -539,6 +595,22 @@ export const TASKS: Task[] = [
     priority: 'High',
     status: 'Completed',
     createdAt: 'Oct 1, 2026',
+    submission: {
+      submittedAt: 'Oct 04, 2026, 04:00 PM',
+      submittedBy: 'Sophia Vance',
+      submissionLink: 'https://docs.google.com/spreadsheets/d/budget-fall2026',
+      submissionNotes: 'All receipts attached and verified against student union ledger.',
+      reviewComment: 'Audited and cleared by Faculty Advisor Dr. Evelyn Hayes.',
+      reviewStatus: 'Approved',
+    },
+    history: [
+      { id: 'h-109-1', action: 'Task created', actor: 'Dr. Evelyn Hayes (Faculty)', timestamp: 'Oct 01, 2026, 09:00 AM' },
+      { id: 'h-109-2', action: 'Assigned to Sophia Vance', actor: 'Dr. Evelyn Hayes (Faculty)', timestamp: 'Oct 01, 2026, 09:05 AM' },
+      { id: 'h-109-3', action: 'Work started', actor: 'Sophia Vance', timestamp: 'Oct 02, 2026, 11:30 AM', note: 'Compiled invoice receipts from all 6 departments' },
+      { id: 'h-109-4', action: 'Deliverable submitted', actor: 'Sophia Vance', timestamp: 'Oct 04, 2026, 04:00 PM', note: 'Submitted audited ledger sheets' },
+      { id: 'h-109-5', action: 'Reviewed and Approved', actor: 'Dr. Evelyn Hayes (Faculty)', timestamp: 'Oct 05, 2026, 10:15 AM', note: 'Official signature granted' },
+      { id: 'h-109-6', action: 'Marked Completed', actor: 'Sophia Vance', timestamp: 'Oct 05, 2026, 11:00 AM', note: 'Archived in university registry' },
+    ],
   },
   {
     id: 'tsk-110',
@@ -552,6 +624,22 @@ export const TASKS: Task[] = [
     priority: 'Medium',
     status: 'Completed',
     createdAt: 'Sept 28, 2026',
+    submission: {
+      submittedAt: 'Oct 03, 2026, 07:15 PM',
+      submittedBy: 'Dishank Solanki',
+      submissionLink: 'https://classroom.github.com/classrooms/clubflow-2026',
+      submissionNotes: 'Configured automated CI grading runner, test cases, and student invitation link.',
+      reviewComment: 'Tested and verified with 5 mock freshman submissions.',
+      reviewStatus: 'Approved',
+    },
+    history: [
+      { id: 'h-110-1', action: 'Task created', actor: 'Aryan Mehta (Tech Head)', timestamp: 'Sept 28, 2026, 10:00 AM' },
+      { id: 'h-110-2', action: 'Assigned to Dishank Solanki', actor: 'Aryan Mehta (Tech Head)', timestamp: 'Sept 28, 2026, 10:15 AM' },
+      { id: 'h-110-3', action: 'Work started', actor: 'Dishank Solanki', timestamp: 'Sept 30, 2026, 03:00 PM', note: 'Authored assignment starter templates and tests' },
+      { id: 'h-110-4', action: 'Deliverable submitted', actor: 'Dishank Solanki', timestamp: 'Oct 03, 2026, 07:15 PM', note: 'Submitted classroom dashboard link' },
+      { id: 'h-110-5', action: 'Reviewed and Approved', actor: 'Aryan Mehta (Tech Head)', timestamp: 'Oct 04, 2026, 09:30 AM' },
+      { id: 'h-110-6', action: 'Marked Completed', actor: 'Dishank Solanki', timestamp: 'Oct 04, 2026, 10:00 AM' },
+    ],
   },
   {
     id: 'tsk-111',
@@ -564,6 +652,49 @@ export const TASKS: Task[] = [
     priority: 'Medium',
     status: 'Completed',
     createdAt: 'Sept 25, 2026',
+    submission: {
+      submittedAt: 'Oct 02, 2026, 11:45 PM',
+      submittedBy: 'Rohan Varma',
+      submissionLink: 'https://drive.google.com/drive/folders/keyart-3d-render',
+      submissionNotes: 'Rendered in Cycles with alpha transparency, dark and light background variants.',
+      reviewComment: 'Stunning quality! Assets forwarded to web team.',
+      reviewStatus: 'Approved',
+    },
+    history: [
+      { id: 'h-111-1', action: 'Task created', actor: 'Mira Patel (Design Head)', timestamp: 'Sept 25, 2026, 11:30 AM' },
+      { id: 'h-111-2', action: 'Assigned to Rohan Varma', actor: 'Mira Patel (Design Head)', timestamp: 'Sept 25, 2026, 11:45 AM' },
+      { id: 'h-111-3', action: 'Work started', actor: 'Rohan Varma', timestamp: 'Sept 27, 2026, 05:00 PM', note: 'Modeled procedural city meshes in Blender' },
+      { id: 'h-111-4', action: 'Deliverable submitted', actor: 'Rohan Varma', timestamp: 'Oct 02, 2026, 11:45 PM' },
+      { id: 'h-111-5', action: 'Reviewed and Approved', actor: 'Mira Patel (Design Head)', timestamp: 'Oct 03, 2026, 09:00 AM' },
+      { id: 'h-111-6', action: 'Marked Completed', actor: 'Rohan Varma', timestamp: 'Oct 03, 2026, 09:30 AM' },
+    ],
+  },
+  {
+    id: 'tsk-112',
+    title: 'Sponsorship Outreach Pitch Deck v1 (Rejected Draft)',
+    description: 'Initial proposal deck draft sent to campus corporate sponsors with unverified university co-branding.',
+    department: 'Marketing',
+    assignedBy: 'Sophia Vance',
+    assignedTo: 'Kabir Sen',
+    deadline: 'Oct 08, 2026',
+    priority: 'High',
+    status: 'Rejected',
+    createdAt: 'Oct 02, 2026',
+    submission: {
+      submittedAt: 'Oct 06, 2026, 03:30 PM',
+      submittedBy: 'Kabir Sen',
+      submissionLink: 'https://docs.google.com/presentation/d/sponsors-draft-v1',
+      submissionNotes: 'Uploaded initial 8-slide PDF with prospective tiers and target logos.',
+      reviewComment: 'Needs revision: Faculty advisor noted sponsorship tiers must follow university legal branding guidelines. Please update tier pricing and resubmit.',
+      reviewStatus: 'Rejected',
+    },
+    history: [
+      { id: 'h-112-1', action: 'Task created', actor: 'Sophia Vance (President)', timestamp: 'Oct 02, 2026, 10:00 AM' },
+      { id: 'h-112-2', action: 'Assigned to Kabir Sen', actor: 'Sophia Vance (President)', timestamp: 'Oct 02, 2026, 10:05 AM' },
+      { id: 'h-112-3', action: 'Work started', actor: 'Kabir Sen', timestamp: 'Oct 03, 2026, 02:15 PM', note: 'Drafted slide deck outline and tier charts' },
+      { id: 'h-112-4', action: 'Deliverable submitted', actor: 'Kabir Sen', timestamp: 'Oct 06, 2026, 03:30 PM', note: 'Uploaded draft v1 deck for executive review' },
+      { id: 'h-112-5', action: 'Reviewed and Rejected', actor: 'Sophia Vance (President)', timestamp: 'Oct 07, 2026, 11:20 AM', note: 'Must align with university legal branding guidelines. Resubmission required.' },
+    ],
   },
 ];
 
