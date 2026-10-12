@@ -25,6 +25,7 @@ interface DepartmentsPageProps {
   onNavigate: (tab: NavTab) => void;
   onSelectMember: (member: Member) => void;
   onSelectTask?: (task: Task) => void;
+  onSelectEvent?: (event: ClubEvent) => void;
 }
 
 export const DepartmentsPage: React.FC<DepartmentsPageProps> = ({
@@ -35,6 +36,7 @@ export const DepartmentsPage: React.FC<DepartmentsPageProps> = ({
   onNavigate,
   onSelectMember,
   onSelectTask,
+  onSelectEvent,
 }) => {
   const [selectedDeptId, setSelectedDeptId] = useState<string>(departments[0]?.id || 'dept-tech');
   const [memberSearchQuery, setMemberSearchQuery] = useState('');
@@ -390,6 +392,66 @@ export const DepartmentsPage: React.FC<DepartmentsPageProps> = ({
                   <div className="text-[11px] text-slate-500 shrink-0 flex items-center gap-1.5">
                     <span>Assigned to:</span>
                     <strong className="text-slate-800">{t.assignedTo}</strong>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* Department Events Section */}
+        <div className="pt-4 border-t border-slate-100">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <h3 className="text-sm font-bold text-slate-900">
+                Department Events & Workshops ({deptEvents.length})
+              </h3>
+              <p className="text-xs text-slate-500">
+                Initiatives, keynotes, and hackathons hosted by the {activeDept.name} department.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => onNavigate('Events')}
+              className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 flex items-center gap-1"
+            >
+              Open all in Events <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          <div className="space-y-2">
+            {deptEvents.length === 0 ? (
+              <div className="p-4 bg-slate-50 rounded-lg text-center text-xs text-slate-400">
+                No events currently scheduled under this department.
+              </div>
+            ) : (
+              deptEvents.map((e) => (
+                <div
+                  key={e.id}
+                  onClick={() => {
+                    if (onSelectEvent) {
+                      onSelectEvent(e);
+                    } else {
+                      onNavigate('Events');
+                    }
+                  }}
+                  className="p-3 rounded-lg border border-slate-100 hover:border-slate-200 bg-slate-50/50 hover:bg-white transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-2 cursor-pointer group"
+                >
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                      <StatusBadge status={e.status} size="sm" />
+                      <span className="text-[11px] font-mono text-slate-500">{e.date}</span>
+                      <span className="text-[11px] font-mono text-slate-400">· {e.startTime} – {e.endTime}</span>
+                    </div>
+                    <p className="text-xs font-bold text-slate-900 truncate group-hover:text-indigo-600 transition-colors">
+                      {e.title}
+                    </p>
+                  </div>
+
+                  <div className="text-[11px] text-slate-500 shrink-0 flex items-center gap-3">
+                    <span>Venue: <strong className="text-slate-700">{e.venue}</strong></span>
+                    <span>RSVPs: <strong className="text-slate-700">{e.attendeesCount}/{e.capacity}</strong></span>
+                    <span className="text-indigo-600 font-semibold group-hover:underline">View Details →</span>
                   </div>
                 </div>
               ))

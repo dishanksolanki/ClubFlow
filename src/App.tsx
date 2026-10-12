@@ -22,6 +22,7 @@ import { CreateAnnouncementModal } from './components/modals/CreateAnnouncementM
 import { CreateEventModal } from './components/modals/CreateEventModal';
 import { MemberDetailModal } from './components/modals/MemberDetailModal';
 import { TaskDetailModal } from './components/modals/TaskDetailModal';
+import { EventDetailModal } from './components/modals/EventDetailModal';
 
 // Mock Data
 import {
@@ -68,6 +69,7 @@ export default function App() {
   const [isCreateEventOpen, setIsCreateEventOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
   const [selectedTaskForDetail, setSelectedTaskForDetail] = useState<Task | null>(null);
+  const [selectedEventForDetail, setSelectedEventForDetail] = useState<ClubEvent | null>(null);
 
   const departmentsList: DepartmentType[] = [
     'Technical',
@@ -158,6 +160,15 @@ export default function App() {
     setNotifications((prev) => [notif, ...prev]);
   };
 
+  const handleUpdateEvent = (updatedEvent: ClubEvent) => {
+    setEvents((prev) =>
+      prev.map((e) => (e.id === updatedEvent.id ? updatedEvent : e))
+    );
+    if (selectedEventForDetail?.id === updatedEvent.id) {
+      setSelectedEventForDetail(updatedEvent);
+    }
+  };
+
   const handleMarkNotificationAsRead = (id: string) => {
     setNotifications((prev) =>
       prev.map((n) => (n.id === id ? { ...n, read: true } : n))
@@ -219,7 +230,18 @@ export default function App() {
           notifications={notifications}
           onMarkNotificationAsRead={handleMarkNotificationAsRead}
           onClearAllNotifications={handleClearAllNotifications}
-          onGlobalSearchSelect={(_type, _id) => {}}
+          onGlobalSearchSelect={(type, id) => {
+            if (type === 'event') {
+              const found = events.find((e) => e.id === id);
+              if (found) setSelectedEventForDetail(found);
+            } else if (type === 'task') {
+              const found = tasks.find((t) => t.id === id);
+              if (found) setSelectedTaskForDetail(found);
+            } else if (type === 'member') {
+              const found = members.find((m) => m.id === id);
+              if (found) setSelectedMember(found);
+            }
+          }}
           searchQuery={globalSearchQuery}
           onSearchQueryChange={setGlobalSearchQuery}
         />
@@ -239,6 +261,7 @@ export default function App() {
               onOpenCreateAnnouncement={() => setIsCreateAnnouncementOpen(true)}
               onOpenCreateEvent={() => setIsCreateEventOpen(true)}
               onSelectMember={handleSelectMemberById}
+              onSelectEvent={(event) => setSelectedEventForDetail(event)}
             />
           )}
 
@@ -247,6 +270,19 @@ export default function App() {
               events={events}
               onOpenCreateEvent={() => setIsCreateEventOpen(true)}
               departments={departmentsList}
+              members={members}
+              tasks={tasks}
+              currentUser={currentUser}
+              onUpdateEvent={handleUpdateEvent}
+              onSelectTask={(task) => {
+                setSelectedEventForDetail(null);
+                setSelectedTaskForDetail(task);
+              }}
+              onSelectMember={(member) => {
+                setSelectedEventForDetail(null);
+                setSelectedMember(member);
+              }}
+              onSelectEvent={(event) => setSelectedEventForDetail(event)}
             />
           )}
 
@@ -295,6 +331,7 @@ export default function App() {
               onNavigate={setActiveTab}
               onSelectMember={(m) => setSelectedMember(m)}
               onSelectTask={(task) => setSelectedTaskForDetail(task)}
+              onSelectEvent={(event) => setSelectedEventForDetail(event)}
             />
           )}
 
@@ -356,6 +393,7 @@ export default function App() {
         onAddEvent={handleAddEvent}
         currentUser={currentUser}
         departments={departmentsList}
+        members={members}
       />
 
       <MemberDetailModal
@@ -376,6 +414,24 @@ export default function App() {
         onUpdateTask={(updatedTask) => {
           handleUpdateTask(updatedTask);
           setSelectedTaskForDetail(updatedTask);
+        }}
+      />
+
+      <EventDetailModal
+        event={selectedEventForDetail}
+        isOpen={Boolean(selectedEventForDetail)}
+        onClose={() => setSelectedEventForDetail(null)}
+        members={members}
+        tasks={tasks}
+        currentUser={currentUser}
+        onUpdateEvent={handleUpdateEvent}
+        onSelectTask={(task) => {
+          setSelectedEventForDetail(null);
+          setSelectedTaskForDetail(task);
+        }}
+        onSelectMember={(member) => {
+          setSelectedEventForDetail(null);
+          setSelectedMember(member);
         }}
       />
     </div>

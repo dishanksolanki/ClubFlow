@@ -17,7 +17,7 @@ export type TaskStatus =
 
 export type TaskPriority = 'Low' | 'Medium' | 'High' | 'Urgent';
 
-export type EventStatus = 'Upcoming' | 'In Progress' | 'Completed' | 'Cancelled';
+export type EventStatus = 'Upcoming' | 'Ongoing' | 'Completed' | 'Cancelled';
 
 export type HierarchyRole =
   | 'Faculty Advisor'
@@ -86,15 +86,19 @@ export interface ClubEvent {
   title: string;
   description: string;
   date: string;
+  startTime: string;
+  endTime: string;
   time: string;
   venue: string;
   organizer: string;
-  organizerRole: string;
+  organizerRole?: string;
   department: DepartmentType;
   status: EventStatus;
   attendeesCount: number;
   capacity: number;
-  tags: string[];
+  tags?: string[];
+  participatingMembers?: string[];
+  relatedTaskIds?: string[];
 }
 
 export interface AttendanceRecord {

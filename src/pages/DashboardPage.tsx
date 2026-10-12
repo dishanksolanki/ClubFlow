@@ -27,6 +27,7 @@ interface DashboardPageProps {
   onOpenCreateAnnouncement: () => void;
   onOpenCreateEvent: () => void;
   onSelectMember: (memberId: string) => void;
+  onSelectEvent?: (event: ClubEvent) => void;
 }
 
 export const DashboardPage: React.FC<DashboardPageProps> = ({
@@ -39,10 +40,22 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
   onOpenLogHours,
   onOpenCreateAnnouncement,
   onOpenCreateEvent,
+  onSelectEvent,
 }) => {
   const pendingTasks = tasks.filter((t) => t.status === 'Pending' || t.status === 'In Progress');
   const completedTasks = tasks.filter((t) => t.status === 'Completed' || t.status === 'Approved');
-  const upcomingEvents = events.filter((e) => e.status === 'Upcoming' || e.status === 'In Progress').slice(0, 3);
+
+  // Real event counts from the Events section
+  const totalEventsCount = events.length;
+  const upcomingCount = events.filter((e) => e.status === 'Upcoming').length;
+  const ongoingCount = events.filter((e) => e.status === 'Ongoing').length;
+  const pastEventsCount = events.filter((e) => e.status === 'Completed' || e.status === 'Cancelled').length;
+
+  // Real upcoming & ongoing events to display on Dashboard
+  const upcomingEvents = events
+    .filter((e) => e.status === 'Upcoming' || e.status === 'Ongoing')
+    .slice(0, 4);
+
   const myTasks = tasks.filter((t) => t.assignedTo === currentUser.name || t.assignedTo.includes('Dishank'));
 
   return (
@@ -59,7 +72,9 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
               Welcome back, {currentUser.name.split(' ')[0]}
             </h1>
             <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl">
-              Here is your club operations summary. 2 upcoming events need equipment sign-off, and 1 high-priority task is nearing deadline.
+              Club operations summary: <strong className="text-slate-800">{upcomingCount} upcoming</strong> and{' '}
+              <strong className="text-slate-800">{ongoingCount} ongoing</strong> events across departments, with{' '}
+              <strong className="text-slate-800">{pendingTasks.length} pending tasks</strong> under active tracking.
             </p>
           </div>
 
@@ -166,12 +181,12 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           </div>
           <div className="flex items-baseline gap-2">
             <span className="text-2xl font-bold font-mono tabular-nums text-slate-900">
-              18
+              {completedTasks.length}
             </span>
-            <span className="text-xs text-indigo-600 font-medium">+3 this week</span>
+            <span className="text-xs text-indigo-600 font-medium">Verified deliverables</span>
           </div>
           <div className="mt-3 flex items-center justify-between text-[11px] text-slate-400 pt-3 border-t border-slate-100">
-            <span>94% on-time rate</span>
+            <span>Across all departments</span>
             <span className="group-hover:text-indigo-600 font-medium flex items-center gap-0.5 transition-colors">
               History <ArrowUpRight className="w-3 h-3" />
             </span>
@@ -204,6 +219,50 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
         </div>
       </div>
 
+      {/* Events Operational Overview Strip */}
+      <div className="bg-slate-900 text-white p-4 rounded-xl shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center shrink-0">
+            <Calendar className="w-4 h-4" />
+          </div>
+          <div>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-200">
+              Club Events Tracker
+            </h3>
+            <p className="text-[11px] text-slate-400">
+              Coordinated calendar spanning workshops, demos, and campus keynotes
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="px-3 py-1 bg-slate-800 border border-slate-700 rounded-lg text-xs font-mono">
+            <span className="text-slate-400">Total: </span>
+            <strong className="text-white">{totalEventsCount}</strong>
+          </div>
+          <div className="px-3 py-1 bg-blue-950 border border-blue-800 text-blue-300 rounded-lg text-xs font-mono">
+            <span>Upcoming: </span>
+            <strong className="text-white">{upcomingCount}</strong>
+          </div>
+          <div className="px-3 py-1 bg-emerald-950 border border-emerald-800 text-emerald-300 rounded-lg text-xs font-mono">
+            <span>Ongoing: </span>
+            <strong className="text-white">{ongoingCount}</strong>
+          </div>
+          <div className="px-3 py-1 bg-slate-800 border border-slate-700 text-slate-300 rounded-lg text-xs font-mono">
+            <span>Past: </span>
+            <strong className="text-white">{pastEventsCount}</strong>
+          </div>
+          <button
+            type="button"
+            onClick={() => onNavigate('Events')}
+            className="px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-semibold transition-colors flex items-center gap-1 shrink-0 ml-auto sm:ml-0"
+          >
+            <span>Events Board</span>
+            <ArrowUpRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      </div>
+
       {/* Main Grid: Upcoming Events & Task Progress */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Upcoming Events Column (2 cols) */}
@@ -212,57 +271,87 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           <div className="bg-white rounded-xl border border-slate-200/90 p-5 shadow-2xs">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h2 className="text-base font-bold text-slate-900">Upcoming Events</h2>
-                <p className="text-xs text-slate-500">Official club workshops, keynotes, and competitions</p>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-base font-bold text-slate-900">Upcoming Events</h2>
+                  <span className="text-xs font-mono font-semibold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-100">
+                    {upcomingEvents.length} active
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Click any event card to view run of show, venue, participating members, and related tasks.
+                </p>
               </div>
               <button
                 type="button"
                 onClick={() => onNavigate('Events')}
-                className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 flex items-center gap-1"
+                className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 flex items-center gap-1 shrink-0"
               >
-                View all <ChevronRight className="w-3.5 h-3.5" />
+                View all ({totalEventsCount}) <ChevronRight className="w-3.5 h-3.5" />
               </button>
             </div>
 
             <div className="space-y-3">
-              {upcomingEvents.map((evt) => (
-                <div
-                  key={evt.id}
-                  onClick={() => onNavigate('Events')}
-                  className="p-4 rounded-lg border border-slate-100 hover:border-slate-200 hover:bg-slate-50/50 transition-all cursor-pointer group"
-                >
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <StatusBadge status={evt.status} size="sm" />
-                        <span className="text-xs text-slate-500 font-medium">{evt.department}</span>
-                      </div>
-                      <h3 className="text-sm font-semibold text-slate-900 group-hover:text-indigo-600 transition-colors">
-                        {evt.title}
-                      </h3>
-                    </div>
-                    <div className="text-left sm:text-right shrink-0">
-                      <div className="text-xs font-semibold text-slate-800 font-mono">
-                        {evt.date}
-                      </div>
-                      <div className="text-[11px] text-slate-500">
-                        {evt.time}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="mt-3 pt-2.5 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500">
-                    <div className="flex items-center gap-1 text-slate-600 truncate">
-                      <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                      <span className="truncate">{evt.venue}</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <span>{evt.attendeesCount} / {evt.capacity} seats filled</span>
-                      <span className="text-indigo-600 font-medium">Lead: {evt.organizer.split(' ')[0]}</span>
-                    </div>
-                  </div>
+              {upcomingEvents.length === 0 ? (
+                <div className="p-8 text-center bg-slate-50 rounded-lg border border-slate-100">
+                  <Calendar className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                  <p className="text-xs font-semibold text-slate-700">No upcoming events scheduled</p>
+                  <p className="text-[11px] text-slate-400 mt-0.5">Schedule a new workshop or general meeting.</p>
                 </div>
-              ))}
+              ) : (
+                upcomingEvents.map((evt) => (
+                  <div
+                    key={evt.id}
+                    onClick={() => {
+                      if (onSelectEvent) {
+                        onSelectEvent(evt);
+                      } else {
+                        onNavigate('Events');
+                      }
+                    }}
+                    className="p-4 rounded-xl border border-slate-200/80 hover:border-indigo-400 hover:bg-indigo-50/20 bg-white transition-all cursor-pointer group shadow-2xs"
+                  >
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 mb-1 flex-wrap">
+                          <StatusBadge status={evt.status} size="sm" />
+                          <span className="text-xs text-slate-700 font-semibold bg-slate-50 px-2 py-0.5 rounded-md border border-slate-200">
+                            {evt.department}
+                          </span>
+                        </div>
+                        <h3 className="text-sm font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
+                          {evt.title}
+                        </h3>
+                      </div>
+                      <div className="text-left sm:text-right shrink-0">
+                        <div className="text-xs font-semibold text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-md font-mono inline-block">
+                          {evt.date}
+                        </div>
+                        <div className="text-[11px] text-slate-500 font-mono mt-1">
+                          {evt.startTime} – {evt.endTime}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-3 pt-2.5 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500">
+                      <div className="flex items-center gap-1.5 text-slate-600 truncate max-w-sm">
+                        <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                        <span className="truncate">{evt.venue}</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="font-mono text-slate-700">
+                          <strong>{evt.attendeesCount}</strong> / {evt.capacity} seats
+                        </span>
+                        <span className="text-slate-600">
+                          Lead: <strong className="text-slate-800">{evt.organizer}</strong>
+                        </span>
+                        <span className="text-xs font-semibold text-indigo-600 flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
+                          Details <ArrowUpRight className="w-3 h-3" />
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
 

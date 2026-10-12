@@ -56,6 +56,9 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, size = 'md' })
       // Event Statuses
       case 'Upcoming':
         return 'bg-blue-50 text-blue-700 border-blue-200';
+      case 'Ongoing':
+      case 'In Progress':
+        return 'bg-emerald-50 text-emerald-700 border-emerald-200 font-medium';
       case 'Cancelled':
         return 'bg-slate-100 text-slate-500 border-slate-200';
 
