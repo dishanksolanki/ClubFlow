@@ -21,6 +21,7 @@ import { LogHoursModal } from './components/modals/LogHoursModal';
 import { CreateAnnouncementModal } from './components/modals/CreateAnnouncementModal';
 import { CreateEventModal } from './components/modals/CreateEventModal';
 import { MemberDetailModal } from './components/modals/MemberDetailModal';
+import { TaskDetailModal } from './components/modals/TaskDetailModal';
 
 // Mock Data
 import {
@@ -66,6 +67,7 @@ export default function App() {
   const [isCreateAnnouncementOpen, setIsCreateAnnouncementOpen] = useState(false);
   const [isCreateEventOpen, setIsCreateEventOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
+  const [selectedTaskForDetail, setSelectedTaskForDetail] = useState<Task | null>(null);
 
   const departmentsList: DepartmentType[] = [
     'Technical',
@@ -279,6 +281,7 @@ export default function App() {
             <MembersPage
               members={members}
               departments={departmentsList}
+              tasks={tasks}
               onSelectMember={(m) => setSelectedMember(m)}
             />
           )}
@@ -291,6 +294,7 @@ export default function App() {
               events={events}
               onNavigate={setActiveTab}
               onSelectMember={(m) => setSelectedMember(m)}
+              onSelectTask={(task) => setSelectedTaskForDetail(task)}
             />
           )}
 
@@ -357,6 +361,22 @@ export default function App() {
       <MemberDetailModal
         member={selectedMember}
         onClose={() => setSelectedMember(null)}
+        tasks={tasks}
+        onSelectTask={(task) => {
+          setSelectedMember(null);
+          setSelectedTaskForDetail(task);
+        }}
+      />
+
+      <TaskDetailModal
+        task={selectedTaskForDetail}
+        isOpen={Boolean(selectedTaskForDetail)}
+        onClose={() => setSelectedTaskForDetail(null)}
+        currentUser={currentUser}
+        onUpdateTask={(updatedTask) => {
+          handleUpdateTask(updatedTask);
+          setSelectedTaskForDetail(updatedTask);
+        }}
       />
     </div>
   );

@@ -96,7 +96,14 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
             </label>
             <select
               value={department}
-              onChange={(e) => setDepartment(e.target.value as DepartmentType)}
+              onChange={(e) => {
+                const newDept = e.target.value as DepartmentType;
+                setDepartment(newDept);
+                const firstMember = members.find((m) => m.department === newDept);
+                if (firstMember) {
+                  setAssignedTo(firstMember.name);
+                }
+              }}
               className="w-full px-3 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:outline-hidden focus:ring-1 focus:ring-indigo-500 text-slate-900"
             >
               {departments.map((d) => (
@@ -109,18 +116,31 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
 
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1">
-              Assignee
+              Assign to Member
             </label>
             <select
               value={assignedTo}
               onChange={(e) => setAssignedTo(e.target.value)}
               className="w-full px-3 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:outline-hidden focus:ring-1 focus:ring-indigo-500 text-slate-900"
             >
-              {members.map((m) => (
-                <option key={m.id} value={m.name}>
-                  {m.name} ({m.department})
-                </option>
-              ))}
+              <optgroup label={`${department} Department`}>
+                {members
+                  .filter((m) => m.department === department)
+                  .map((m) => (
+                    <option key={m.id} value={m.name}>
+                      {m.name} · {m.role}
+                    </option>
+                  ))}
+              </optgroup>
+              <optgroup label="Other Departments">
+                {members
+                  .filter((m) => m.department !== department)
+                  .map((m) => (
+                    <option key={m.id} value={m.name}>
+                      {m.name} ({m.department})
+                    </option>
+                  ))}
+              </optgroup>
             </select>
           </div>
         </div>

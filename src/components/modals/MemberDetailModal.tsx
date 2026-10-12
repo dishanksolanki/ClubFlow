@@ -1,27 +1,50 @@
 import React from 'react';
 import { Modal } from '../common/Modal';
-import { Member } from '../../types';
+import { Member, Task } from '../../types';
 import { Avatar } from '../common/Avatar';
 import { StatusBadge } from '../common/StatusBadge';
-import { Mail, GraduationCap, Award, Calendar, CheckCircle2, Clock } from 'lucide-react';
+import {
+  Mail,
+  GraduationCap,
+  Award,
+  Calendar,
+  CheckCircle2,
+  Clock,
+  CheckSquare,
+  ChevronRight,
+  ExternalLink,
+} from 'lucide-react';
 
 interface MemberDetailModalProps {
   member: Member | null;
   onClose: () => void;
+  tasks?: Task[];
+  onSelectTask?: (task: Task) => void;
 }
 
 export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
   member,
   onClose,
+  tasks = [],
+  onSelectTask,
 }) => {
   if (!member) return null;
+
+  // Filter tasks assigned to this member
+  const memberTasks = tasks.filter(
+    (t) =>
+      t.assignedTo.trim().toLowerCase() === member.name.trim().toLowerCase() ||
+      t.assignedTo.toLowerCase().includes(member.name.toLowerCase()) ||
+      member.name.toLowerCase().includes(t.assignedTo.toLowerCase())
+  );
 
   return (
     <Modal
       isOpen={Boolean(member)}
       onClose={onClose}
       title="Member Profile"
-      maxWidth="md"
+      description={`${member.department} Department · ${member.hierarchyRole}`}
+      maxWidth="lg"
     >
       <div className="space-y-5">
         {/* Profile Card Header */}
@@ -31,6 +54,7 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
             name={member.name}
             initials={member.initials}
             size="xl"
+            className="ring-4 ring-indigo-50"
           />
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 flex-wrap">
@@ -66,7 +90,7 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
           </div>
           <div className="flex items-center gap-2.5">
             <GraduationCap className="w-4 h-4 text-slate-400 shrink-0" />
-            <span>ID: <strong className="font-mono">{member.studentId}</strong> · {member.year}</span>
+            <span>ID: <strong className="font-mono text-slate-700">{member.studentId}</strong> · {member.year}</span>
           </div>
           <div className="flex items-center gap-2.5">
             <Calendar className="w-4 h-4 text-slate-400 shrink-0" />
@@ -112,11 +136,63 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
           </div>
         </div>
 
+        {/* Assigned Tasks & Statuses Section */}
+        <div className="pt-2 border-t border-slate-100">
+          <div className="flex items-center justify-between mb-2.5">
+            <h5 className="text-xs font-semibold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+              <CheckSquare className="w-3.5 h-3.5 text-indigo-600" />
+              <span>Assigned Tasks ({memberTasks.length})</span>
+            </h5>
+            <span className="text-[11px] text-slate-400">
+              {memberTasks.filter((t) => t.status === 'Completed').length} of {memberTasks.length} finished
+            </span>
+          </div>
+
+          {memberTasks.length === 0 ? (
+            <div className="p-4 bg-slate-50 rounded-lg border border-slate-100 text-center text-xs text-slate-400">
+              No tasks currently assigned to this member.
+            </div>
+          ) : (
+            <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+              {memberTasks.map((task) => (
+                <div
+                  key={task.id}
+                  onClick={() => {
+                    if (onSelectTask) {
+                      onSelectTask(task);
+                    }
+                  }}
+                  className={`p-3 rounded-lg border border-slate-200/80 bg-white hover:border-indigo-300 hover:bg-slate-50/50 transition-colors flex items-center justify-between gap-3 ${
+                    onSelectTask ? 'cursor-pointer group' : ''
+                  }`}
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                      <StatusBadge status={task.status} size="sm" />
+                      <StatusBadge status={task.priority} size="sm" />
+                      <span className="text-[11px] font-mono text-slate-500">
+                        Due {task.deadline}
+                      </span>
+                    </div>
+                    <p className="text-xs font-bold text-slate-900 truncate group-hover:text-indigo-600 transition-colors">
+                      {task.title}
+                    </p>
+                  </div>
+
+                  {onSelectTask && (
+                    <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-indigo-600 shrink-0 transition-colors" />
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
         <div className="pt-2 flex justify-end">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
+            className="px-4 py-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
           >
             Close
           </button>
