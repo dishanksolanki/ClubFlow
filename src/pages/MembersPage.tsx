@@ -1,0 +1,266 @@
+import React, { useState } from 'react';
+import {
+  Search,
+  LayoutGrid,
+  List,
+  Mail,
+  GraduationCap,
+  Clock,
+  CheckCircle2,
+  Award,
+} from 'lucide-react';
+import { DepartmentType, Member } from '../types';
+import { Avatar } from '../components/common/Avatar';
+import { StatusBadge } from '../components/common/StatusBadge';
+
+interface MembersPageProps {
+  members: Member[];
+  departments: DepartmentType[];
+  onSelectMember: (member: Member) => void;
+}
+
+export const MembersPage: React.FC<MembersPageProps> = ({
+  members,
+  departments,
+  onSelectMember,
+}) => {
+  const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
+  const [selectedDept, setSelectedDept] = useState<string>('All');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredMembers = members.filter((m) => {
+    if (selectedDept !== 'All' && m.department !== selectedDept) return false;
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      const matchName = m.name.toLowerCase().includes(q);
+      const matchRole = m.role.toLowerCase().includes(q);
+      const matchEmail = m.email.toLowerCase().includes(q);
+      const matchId = m.studentId.toLowerCase().includes(q);
+      if (!matchName && !matchRole && !matchEmail && !matchId) return false;
+    }
+    return true;
+  });
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+            Club Members Directory
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+            Browse active students, committee leads, department heads, and faculty advisors.
+          </p>
+        </div>
+
+        {/* View Mode Toggle */}
+        <div className="flex items-center gap-2 self-start sm:self-auto">
+          <div className="flex items-center bg-slate-100 p-1 rounded-lg">
+            <button
+              type="button"
+              onClick={() => setViewMode('grid')}
+              aria-label="Grid view"
+              className={`p-1.5 rounded-md transition-colors ${
+                viewMode === 'grid'
+                  ? 'bg-white text-slate-900 shadow-2xs'
+                  : 'text-slate-500 hover:text-slate-900'
+              }`}
+            >
+              <LayoutGrid className="w-4 h-4" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('table')}
+              aria-label="Table view"
+              className={`p-1.5 rounded-md transition-colors ${
+                viewMode === 'table'
+                  ? 'bg-white text-slate-900 shadow-2xs'
+                  : 'text-slate-500 hover:text-slate-900'
+              }`}
+            >
+              <List className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Filter and Search Bar */}
+      <div className="bg-white p-4 rounded-xl border border-slate-200/90 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-3">
+        {/* Department Filter */}
+        <div className="flex items-center gap-2">
+          <select
+            value={selectedDept}
+            onChange={(e) => setSelectedDept(e.target.value)}
+            className="px-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-700 focus:outline-hidden focus:ring-1 focus:ring-indigo-500 font-medium"
+          >
+            <option value="All">All Departments ({members.length})</option>
+            {departments.map((d) => (
+              <option key={d} value={d}>
+                {d}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Search */}
+        <div className="relative w-full md:w-80">
+          <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+          <input
+            type="text"
+            placeholder="Search by name, ID, role..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-hidden focus:ring-1 focus:ring-indigo-500"
+          />
+        </div>
+      </div>
+
+      {/* Grid or Table Display */}
+      {viewMode === 'grid' ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredMembers.map((member) => (
+            <div
+              key={member.id}
+              onClick={() => onSelectMember(member)}
+              className="bg-white rounded-xl border border-slate-200/90 p-5 shadow-2xs hover:border-slate-300 hover:shadow-xs transition-all cursor-pointer flex flex-col justify-between group"
+            >
+              <div>
+                <div className="flex items-start justify-between gap-3 mb-3">
+                  <Avatar
+                    src={member.avatarUrl}
+                    name={member.name}
+                    initials={member.initials}
+                    size="lg"
+                  />
+                  <StatusBadge status={member.status} size="sm" />
+                </div>
+
+                <h3 className="text-sm font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
+                  {member.name}
+                </h3>
+                <p className="text-xs font-semibold text-indigo-600 mt-0.5">
+                  {member.role}
+                </p>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  {member.department} Department · {member.hierarchyRole}
+                </p>
+
+                <div className="mt-3 pt-3 border-t border-slate-100 space-y-1 text-xs text-slate-500">
+                  <div className="flex items-center gap-2 truncate">
+                    <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                    <span className="truncate">{member.email}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <GraduationCap className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                    <span>ID: <strong className="font-mono text-slate-700">{member.studentId}</strong> · {member.year}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Stats Footer */}
+              <div className="mt-4 pt-3 border-t border-slate-100 grid grid-cols-3 gap-1 text-center bg-slate-50/70 p-2 rounded-lg">
+                <div>
+                  <div className="flex items-center justify-center gap-0.5 text-slate-400 text-[10px]">
+                    <Award className="w-3 h-3" />
+                  </div>
+                  <p className="text-xs font-bold font-mono tabular-nums text-slate-900">
+                    {member.attendanceRate}%
+                  </p>
+                  <p className="text-[10px] text-slate-400">Attendance</p>
+                </div>
+                <div>
+                  <div className="flex items-center justify-center gap-0.5 text-slate-400 text-[10px]">
+                    <CheckCircle2 className="w-3 h-3" />
+                  </div>
+                  <p className="text-xs font-bold font-mono tabular-nums text-slate-900">
+                    {member.tasksCompleted}
+                  </p>
+                  <p className="text-[10px] text-slate-400">Tasks</p>
+                </div>
+                <div>
+                  <div className="flex items-center justify-center gap-0.5 text-slate-400 text-[10px]">
+                    <Clock className="w-3 h-3" />
+                  </div>
+                  <p className="text-xs font-bold font-mono tabular-nums text-slate-900">
+                    {member.workingHours}h
+                  </p>
+                  <p className="text-[10px] text-slate-400">Hours</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        /* Table View */
+        <div className="bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr className="bg-slate-50/80 border-b border-slate-200/80 text-slate-500 font-semibold uppercase tracking-wider text-[11px]">
+                  <th className="py-3 px-4">Member</th>
+                  <th className="py-3 px-4">Department & Position</th>
+                  <th className="py-3 px-4">Student ID / Year</th>
+                  <th className="py-3 px-4 text-center">Attendance</th>
+                  <th className="py-3 px-4 text-center">Tasks Done</th>
+                  <th className="py-3 px-4 text-center">Work Hours</th>
+                  <th className="py-3 px-4">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {filteredMembers.map((member) => (
+                  <tr
+                    key={member.id}
+                    onClick={() => onSelectMember(member)}
+                    className="hover:bg-slate-50/70 transition-colors cursor-pointer"
+                  >
+                    <td className="py-3 px-4 whitespace-nowrap">
+                      <div className="flex items-center gap-3">
+                        <Avatar
+                          src={member.avatarUrl}
+                          name={member.name}
+                          initials={member.initials}
+                          size="sm"
+                        />
+                        <div>
+                          <p className="font-semibold text-slate-900">{member.name}</p>
+                          <p className="text-[11px] text-slate-400">{member.email}</p>
+                        </div>
+                      </div>
+                    </td>
+
+                    <td className="py-3 px-4 whitespace-nowrap">
+                      <p className="font-medium text-slate-800">{member.role}</p>
+                      <p className="text-[11px] text-slate-500">{member.department} Department</p>
+                    </td>
+
+                    <td className="py-3 px-4 whitespace-nowrap font-mono text-slate-700">
+                      {member.studentId}
+                      <span className="block text-[11px] font-sans text-slate-400">{member.year}</span>
+                    </td>
+
+                    <td className="py-3 px-4 whitespace-nowrap text-center font-mono font-semibold text-slate-900">
+                      {member.attendanceRate}%
+                    </td>
+
+                    <td className="py-3 px-4 whitespace-nowrap text-center font-mono font-semibold text-slate-900">
+                      {member.tasksCompleted}
+                    </td>
+
+                    <td className="py-3 px-4 whitespace-nowrap text-center font-mono font-semibold text-slate-900">
+                      {member.workingHours}h
+                    </td>
+
+                    <td className="py-3 px-4 whitespace-nowrap">
+                      <StatusBadge status={member.status} size="sm" />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
