@@ -54,7 +54,7 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
             name={member.name}
             initials={member.initials}
             size="xl"
-            className="ring-4 ring-indigo-50"
+            className="ring-4 ring-slate-100 shadow-xs"
           />
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 flex-wrap">
@@ -72,7 +72,7 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
 
         {/* Bio */}
         {member.bio && (
-          <div className="p-3 bg-slate-50 rounded-lg border border-slate-100 text-xs text-slate-600 leading-relaxed">
+          <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200/60 text-xs text-slate-700 leading-relaxed shadow-2xs">
             {member.bio}
           </div>
         )}
@@ -100,13 +100,13 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
 
         {/* Operational Metrics */}
         <div>
-          <h5 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+          <h5 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 font-mono">
             Performance & Track Record
           </h5>
           <div className="grid grid-cols-3 gap-2.5">
-            <div className="p-3 rounded-lg bg-slate-50 border border-slate-100 text-center">
+            <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 text-center shadow-2xs">
               <div className="flex items-center justify-center gap-1 text-slate-400 mb-1">
-                <Award className="w-3.5 h-3.5" />
+                <Award className="w-3.5 h-3.5 text-emerald-600" />
               </div>
               <p className="text-lg font-bold font-mono tabular-nums text-slate-900">
                 {member.attendanceRate}%
@@ -114,9 +114,9 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
               <p className="text-[10px] text-slate-500 font-medium">Attendance</p>
             </div>
 
-            <div className="p-3 rounded-lg bg-slate-50 border border-slate-100 text-center">
+            <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 text-center shadow-2xs">
               <div className="flex items-center justify-center gap-1 text-slate-400 mb-1">
-                <CheckCircle2 className="w-3.5 h-3.5" />
+                <CheckCircle2 className="w-3.5 h-3.5 text-indigo-600" />
               </div>
               <p className="text-lg font-bold font-mono tabular-nums text-slate-900">
                 {member.tasksCompleted}
@@ -124,9 +124,9 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
               <p className="text-[10px] text-slate-500 font-medium">Completed</p>
             </div>
 
-            <div className="p-3 rounded-lg bg-slate-50 border border-slate-100 text-center">
+            <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 text-center shadow-2xs">
               <div className="flex items-center justify-center gap-1 text-slate-400 mb-1">
-                <Clock className="w-3.5 h-3.5" />
+                <Clock className="w-3.5 h-3.5 text-blue-600" />
               </div>
               <p className="text-lg font-bold font-mono tabular-nums text-slate-900">
                 {member.workingHours}h
@@ -139,17 +139,17 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
         {/* Assigned Tasks & Statuses Section */}
         <div className="pt-2 border-t border-slate-100">
           <div className="flex items-center justify-between mb-2.5">
-            <h5 className="text-xs font-semibold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+            <h5 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono flex items-center gap-1.5">
               <CheckSquare className="w-3.5 h-3.5 text-indigo-600" />
               <span>Assigned Tasks ({memberTasks.length})</span>
             </h5>
-            <span className="text-[11px] text-slate-400">
-              {memberTasks.filter((t) => t.status === 'Completed').length} of {memberTasks.length} finished
+            <span className="text-[11px] text-slate-400 font-mono">
+              {memberTasks.filter((t) => t.status === 'Completed' || t.status === 'Approved').length} of {memberTasks.length} finished
             </span>
           </div>
 
           {memberTasks.length === 0 ? (
-            <div className="p-4 bg-slate-50 rounded-lg border border-slate-100 text-center text-xs text-slate-400">
+            <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 text-center text-xs text-slate-400">
               No tasks currently assigned to this member.
             </div>
           ) : (
@@ -162,7 +162,7 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
                       onSelectTask(task);
                     }
                   }}
-                  className={`p-3 rounded-lg border border-slate-200/80 bg-white hover:border-indigo-300 hover:bg-slate-50/50 transition-colors flex items-center justify-between gap-3 ${
+                  className={`p-3 rounded-xl border border-slate-200/80 bg-white hover:border-slate-300 hover:bg-slate-50/50 transition-colors flex items-center justify-between gap-3 shadow-2xs ${
                     onSelectTask ? 'cursor-pointer group' : ''
                   }`}
                 >
@@ -180,7 +180,7 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
                   </div>
 
                   {onSelectTask && (
-                    <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-indigo-600 shrink-0 transition-colors" />
+                    <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-slate-600 shrink-0 transition-colors" />
                   )}
                 </div>
               ))}
@@ -192,7 +192,7 @@ export const MemberDetailModal: React.FC<MemberDetailModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
+            className="px-4 py-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors"
           >
             Close
           </button>

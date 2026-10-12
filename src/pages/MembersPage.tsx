@@ -11,6 +11,7 @@ import {
   Users,
   ShieldCheck,
   CheckSquare,
+  RotateCcw,
 } from 'lucide-react';
 import { DepartmentType, Member, Task } from '../types';
 import { Avatar } from '../components/common/Avatar';
@@ -73,14 +74,14 @@ export const MembersPage: React.FC<MembersPageProps> = ({
 
         {/* View Mode Toggle */}
         <div className="flex items-center gap-2 self-start sm:self-auto">
-          <div className="flex items-center bg-slate-100 p-1 rounded-lg">
+          <div className="flex items-center bg-slate-100/90 p-1 rounded-xl border border-slate-200/60 shadow-2xs">
             <button
               type="button"
               onClick={() => setViewMode('grid')}
               aria-label="Grid view"
-              className={`p-1.5 rounded-md transition-colors ${
+              className={`p-1.5 rounded-lg transition-all ${
                 viewMode === 'grid'
-                  ? 'bg-white text-slate-900 shadow-2xs'
+                  ? 'bg-white text-slate-900 shadow-xs font-semibold'
                   : 'text-slate-500 hover:text-slate-900'
               }`}
             >
@@ -90,9 +91,9 @@ export const MembersPage: React.FC<MembersPageProps> = ({
               type="button"
               onClick={() => setViewMode('table')}
               aria-label="Table view"
-              className={`p-1.5 rounded-md transition-colors ${
+              className={`p-1.5 rounded-lg transition-all ${
                 viewMode === 'table'
-                  ? 'bg-white text-slate-900 shadow-2xs'
+                  ? 'bg-white text-slate-900 shadow-xs font-semibold'
                   : 'text-slate-500 hover:text-slate-900'
               }`}
             >
@@ -104,53 +105,53 @@ export const MembersPage: React.FC<MembersPageProps> = ({
 
       {/* Quick Roster Stats Strip */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="p-3.5 rounded-xl border border-slate-200/90 bg-white shadow-2xs">
+        <div className="p-3.5 rounded-xl border border-slate-200/80 bg-white shadow-2xs">
           <div className="flex items-center justify-between text-slate-400 mb-1">
-            <span className="text-[11px] font-medium uppercase tracking-wider text-slate-500">Total Roster</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 font-mono">Total Roster</span>
             <Users className="w-3.5 h-3.5" />
           </div>
-          <p className="text-xl font-bold font-mono tabular-nums text-slate-900">
+          <p className="text-xl font-bold font-mono tabular-nums text-slate-900 mt-1">
             {members.length}
           </p>
           <span className="text-[10px] text-slate-400">Enrolled members</span>
         </div>
 
-        <div className="p-3.5 rounded-xl border border-slate-200/90 bg-white shadow-2xs">
+        <div className="p-3.5 rounded-xl border border-slate-200/80 bg-white shadow-2xs">
           <div className="flex items-center justify-between text-slate-400 mb-1">
-            <span className="text-[11px] font-medium uppercase tracking-wider text-slate-500">Active Status</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 font-mono">Active Standing</span>
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
           </div>
-          <p className="text-xl font-bold font-mono tabular-nums text-slate-900">
+          <p className="text-xl font-bold font-mono tabular-nums text-slate-900 mt-1">
             {activeCount}
           </p>
-          <span className="text-[10px] text-emerald-600 font-medium">In good standing</span>
+          <span className="text-[10px] text-emerald-600 font-semibold font-mono">In good standing</span>
         </div>
 
-        <div className="p-3.5 rounded-xl border border-slate-200/90 bg-white shadow-2xs">
+        <div className="p-3.5 rounded-xl border border-slate-200/80 bg-white shadow-2xs">
           <div className="flex items-center justify-between text-slate-400 mb-1">
-            <span className="text-[11px] font-medium uppercase tracking-wider text-slate-500">Core Leads</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 font-mono">Core Leads</span>
             <Award className="w-3.5 h-3.5 text-indigo-600" />
           </div>
-          <p className="text-xl font-bold font-mono tabular-nums text-slate-900">
+          <p className="text-xl font-bold font-mono tabular-nums text-slate-900 mt-1">
             {coreLeadsCount}
           </p>
           <span className="text-[10px] text-slate-400">Executive board</span>
         </div>
 
-        <div className="p-3.5 rounded-xl border border-slate-200/90 bg-white shadow-2xs">
+        <div className="p-3.5 rounded-xl border border-slate-200/80 bg-white shadow-2xs">
           <div className="flex items-center justify-between text-slate-400 mb-1">
-            <span className="text-[11px] font-medium uppercase tracking-wider text-slate-500">Avg Attendance</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 font-mono">Avg Attendance</span>
             <CheckSquare className="w-3.5 h-3.5 text-blue-600" />
           </div>
-          <p className="text-xl font-bold font-mono tabular-nums text-slate-900">
+          <p className="text-xl font-bold font-mono tabular-nums text-slate-900 mt-1">
             {avgAttendance}%
           </p>
-          <span className="text-[10px] text-slate-400">Across all sessions</span>
+          <span className="text-[10px] text-slate-400 font-mono">Across all sessions</span>
         </div>
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200/90 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-3">
+      <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-[0_1px_2px_rgba(0,0,0,0.03)] flex flex-col md:flex-row md:items-center justify-between gap-3">
         {/* Filters */}
         <div className="flex flex-wrap items-center gap-2.5">
           {/* Department Filter */}
@@ -159,7 +160,7 @@ export const MembersPage: React.FC<MembersPageProps> = ({
             <select
               value={selectedDept}
               onChange={(e) => setSelectedDept(e.target.value)}
-              className="px-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-700 focus:outline-hidden focus:ring-1 focus:ring-indigo-500 font-medium"
+              className="px-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-700 focus:outline-hidden focus:ring-2 focus:ring-slate-900/5 focus:border-slate-400 font-medium"
             >
               <option value="All">All Departments ({members.length})</option>
               {departments.map((d) => (
@@ -176,7 +177,7 @@ export const MembersPage: React.FC<MembersPageProps> = ({
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-700 focus:outline-hidden focus:ring-1 focus:ring-indigo-500 font-medium"
+              className="px-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-700 focus:outline-hidden focus:ring-2 focus:ring-slate-900/5 focus:border-slate-400 font-medium"
             >
               <option value="All">All Statuses</option>
               {statusOptions.slice(1).map((st) => (
@@ -186,6 +187,21 @@ export const MembersPage: React.FC<MembersPageProps> = ({
               ))}
             </select>
           </div>
+
+          {(selectedDept !== 'All' || statusFilter !== 'All' || searchQuery) && (
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedDept('All');
+                setStatusFilter('All');
+                setSearchQuery('');
+              }}
+              className="text-xs text-indigo-600 hover:text-indigo-800 font-semibold flex items-center gap-1 ml-1"
+            >
+              <RotateCcw className="w-3 h-3" />
+              <span>Reset</span>
+            </button>
+          )}
         </div>
 
         {/* Search Input */}
@@ -196,7 +212,7 @@ export const MembersPage: React.FC<MembersPageProps> = ({
             placeholder="Search by name, ID, role, department..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-hidden focus:ring-1 focus:ring-indigo-500"
+            className="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-slate-900/5 focus:border-slate-400"
           />
         </div>
       </div>
@@ -205,8 +221,10 @@ export const MembersPage: React.FC<MembersPageProps> = ({
       {viewMode === 'grid' ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredMembers.length === 0 ? (
-            <div className="col-span-full py-12 text-center text-xs text-slate-400 bg-white rounded-xl border border-slate-200">
-              No club members match your search or filters.
+            <div className="col-span-full py-16 text-center text-xs text-slate-400 bg-white rounded-xl border border-slate-200/80 shadow-2xs">
+              <Users className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+              <p className="text-xs font-semibold text-slate-700">No members match your criteria</p>
+              <p className="text-[11px] text-slate-400 mt-0.5">Try searching for a different name, department, or student ID.</p>
             </div>
           ) : (
             filteredMembers.map((member) => {
@@ -220,7 +238,7 @@ export const MembersPage: React.FC<MembersPageProps> = ({
                 <div
                   key={member.id}
                   onClick={() => onSelectMember(member)}
-                  className="bg-white rounded-xl border border-slate-200/90 p-5 shadow-2xs hover:border-indigo-300 hover:shadow-xs transition-all cursor-pointer flex flex-col justify-between group"
+                  className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-[0_1px_2px_rgba(0,0,0,0.03)] hover:border-slate-300 hover:shadow-xs transition-all cursor-pointer flex flex-col justify-between group"
                 >
                   <div>
                     <div className="flex items-start justify-between gap-3 mb-3">
@@ -229,6 +247,7 @@ export const MembersPage: React.FC<MembersPageProps> = ({
                         name={member.name}
                         initials={member.initials}
                         size="lg"
+                        className="ring-2 ring-slate-100"
                       />
                       <StatusBadge status={member.status} size="sm" />
                     </div>
@@ -256,21 +275,21 @@ export const MembersPage: React.FC<MembersPageProps> = ({
                   </div>
 
                   {/* Operational Metrics Strip */}
-                  <div className="mt-4 pt-3 border-t border-slate-100 grid grid-cols-3 gap-1 text-center bg-slate-50/70 p-2 rounded-lg">
+                  <div className="mt-4 pt-3 border-t border-slate-100 grid grid-cols-3 gap-1 text-center bg-slate-50/70 p-2 rounded-xl border border-slate-100">
                     <div>
                       <div className="flex items-center justify-center gap-0.5 text-slate-400 text-[10px]">
-                        <Award className="w-3 h-3" />
+                        <Award className="w-3 h-3 text-emerald-600" />
                       </div>
-                      <p className="text-xs font-bold font-mono tabular-nums text-slate-900">
+                      <p className="text-xs font-bold font-mono tabular-nums text-slate-900 mt-0.5">
                         {member.attendanceRate}%
                       </p>
                       <p className="text-[10px] text-slate-400">Attendance</p>
                     </div>
                     <div>
                       <div className="flex items-center justify-center gap-0.5 text-slate-400 text-[10px]">
-                        <CheckCircle2 className="w-3 h-3" />
+                        <CheckCircle2 className="w-3 h-3 text-indigo-600" />
                       </div>
-                      <p className="text-xs font-bold font-mono tabular-nums text-slate-900">
+                      <p className="text-xs font-bold font-mono tabular-nums text-slate-900 mt-0.5">
                         {member.tasksCompleted}
                       </p>
                       <p className="text-[10px] text-slate-400">
@@ -279,9 +298,9 @@ export const MembersPage: React.FC<MembersPageProps> = ({
                     </div>
                     <div>
                       <div className="flex items-center justify-center gap-0.5 text-slate-400 text-[10px]">
-                        <Clock className="w-3 h-3" />
+                        <Clock className="w-3 h-3 text-blue-600" />
                       </div>
-                      <p className="text-xs font-bold font-mono tabular-nums text-slate-900">
+                      <p className="text-xs font-bold font-mono tabular-nums text-slate-900 mt-0.5">
                         {member.workingHours}h
                       </p>
                       <p className="text-[10px] text-slate-400">Hours</p>
@@ -294,11 +313,11 @@ export const MembersPage: React.FC<MembersPageProps> = ({
         </div>
       ) : (
         /* Table View */
-        <div className="bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden">
+        <div className="bg-white rounded-xl border border-slate-200/80 shadow-[0_1px_2px_rgba(0,0,0,0.03)] overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr className="bg-slate-50/80 border-b border-slate-200/80 text-slate-500 font-semibold uppercase tracking-wider text-[11px]">
+                <tr className="bg-slate-50/80 border-b border-slate-200/80 text-slate-500 font-bold uppercase tracking-wider text-[10px] font-mono">
                   <th className="py-3 px-4">Member</th>
                   <th className="py-3 px-4">Department & Position</th>
                   <th className="py-3 px-4">Student ID / Year</th>
@@ -311,7 +330,7 @@ export const MembersPage: React.FC<MembersPageProps> = ({
               <tbody className="divide-y divide-slate-100">
                 {filteredMembers.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="py-12 text-center text-slate-400">
+                    <td colSpan={7} className="py-16 text-center text-slate-400">
                       No matching members found.
                     </td>
                   </tr>
@@ -320,7 +339,7 @@ export const MembersPage: React.FC<MembersPageProps> = ({
                     <tr
                       key={member.id}
                       onClick={() => onSelectMember(member)}
-                      className="hover:bg-slate-50/70 transition-colors cursor-pointer group"
+                      className="hover:bg-slate-50/80 transition-colors cursor-pointer group"
                     >
                       <td className="py-3 px-4 whitespace-nowrap">
                         <div className="flex items-center gap-3">
@@ -349,15 +368,15 @@ export const MembersPage: React.FC<MembersPageProps> = ({
                         <span className="block text-[11px] font-sans text-slate-400">{member.year}</span>
                       </td>
 
-                      <td className="py-3 px-4 whitespace-nowrap text-center font-mono font-semibold text-slate-900">
+                      <td className="py-3 px-4 whitespace-nowrap text-center font-mono font-bold text-slate-900">
                         {member.attendanceRate}%
                       </td>
 
-                      <td className="py-3 px-4 whitespace-nowrap text-center font-mono font-semibold text-slate-900">
+                      <td className="py-3 px-4 whitespace-nowrap text-center font-mono font-bold text-slate-900">
                         {member.tasksCompleted}
                       </td>
 
-                      <td className="py-3 px-4 whitespace-nowrap text-center font-mono font-semibold text-slate-900">
+                      <td className="py-3 px-4 whitespace-nowrap text-center font-mono font-bold text-slate-900">
                         {member.workingHours}h
                       </td>
 

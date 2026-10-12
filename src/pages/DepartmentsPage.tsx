@@ -11,6 +11,7 @@ import {
   ExternalLink,
   Award,
   Sparkles,
+  ArrowUpRight,
 } from 'lucide-react';
 import { DepartmentInfo, Member, Task, ClubEvent } from '../types';
 import { Avatar } from '../components/common/Avatar';
@@ -75,7 +76,7 @@ export const DepartmentsPage: React.FC<DepartmentsPageProps> = ({
           </p>
         </div>
 
-        <div className="flex items-center gap-2 text-xs text-slate-500 bg-white border border-slate-200/90 px-3 py-1.5 rounded-lg shadow-2xs self-start sm:self-auto">
+        <div className="flex items-center gap-2 text-xs font-semibold text-slate-700 bg-white border border-slate-200/80 px-3 py-1.5 rounded-xl shadow-2xs self-start sm:self-auto font-mono">
           <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
           <span>{departments.length} Operational Departments</span>
         </div>
@@ -95,16 +96,16 @@ export const DepartmentsPage: React.FC<DepartmentsPageProps> = ({
                 setSelectedDeptId(dept.id);
                 setMemberSearchQuery('');
               }}
-              className={`p-5 rounded-xl border transition-all cursor-pointer bg-white shadow-2xs flex flex-col justify-between ${
+              className={`p-5 rounded-xl border transition-all cursor-pointer bg-white flex flex-col justify-between ${
                 isSelected
-                  ? 'border-indigo-600 ring-2 ring-indigo-50 shadow-xs'
-                  : 'border-slate-200/90 hover:border-slate-300 hover:shadow-2xs'
+                  ? 'border-slate-900 ring-2 ring-slate-100 shadow-xs'
+                  : 'border-slate-200/80 hover:border-slate-300 shadow-2xs hover:shadow-xs'
               }`}
             >
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-base font-bold text-slate-900">{dept.name}</span>
-                  <span className="text-xs font-mono font-semibold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700">
+                  <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200/60">
                     {currentDeptMembers.length} members
                   </span>
                 </div>
@@ -131,7 +132,7 @@ export const DepartmentsPage: React.FC<DepartmentsPageProps> = ({
                 </span>
                 <span
                   className={`font-semibold flex items-center gap-1 ${
-                    isSelected ? 'text-indigo-600' : 'text-slate-400'
+                    isSelected ? 'text-slate-900 font-bold' : 'text-slate-400 group-hover:text-slate-600'
                   }`}
                 >
                   {isSelected ? 'Viewing' : 'Open'}
@@ -144,15 +145,15 @@ export const DepartmentsPage: React.FC<DepartmentsPageProps> = ({
       </div>
 
       {/* Detailed Selected Department Panel */}
-      <div className="bg-white rounded-xl border border-slate-200/90 p-6 shadow-2xs space-y-6">
+      <div className="bg-white rounded-xl border border-slate-200/80 p-6 shadow-[0_1px_2px_rgba(0,0,0,0.03)] space-y-6">
         {/* Header bar of selected department */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
           <div>
             <div className="flex items-center gap-2.5 flex-wrap">
-              <h2 className="text-lg sm:text-xl font-bold text-slate-900">
+              <h2 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
                 {activeDept.name} Department
               </h2>
-              <span className="px-2.5 py-0.5 text-xs font-semibold bg-indigo-50 text-indigo-700 rounded-md border border-indigo-200">
+              <span className="px-2.5 py-0.5 text-xs font-semibold bg-indigo-50 text-indigo-700 rounded-md border border-indigo-200/80 font-mono">
                 Active Committee
               </span>
             </div>
@@ -165,7 +166,7 @@ export const DepartmentsPage: React.FC<DepartmentsPageProps> = ({
             <button
               type="button"
               onClick={() => onNavigate('Tasks')}
-              className="px-3 py-1.5 text-xs font-medium text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg transition-colors flex items-center gap-1.5"
+              className="px-3 py-1.5 text-xs font-medium text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-lg transition-colors flex items-center gap-1.5 shadow-2xs"
             >
               <CheckSquare className="w-3.5 h-3.5 text-slate-500" />
               <span>All Tasks ({deptTasks.length})</span>
@@ -173,7 +174,7 @@ export const DepartmentsPage: React.FC<DepartmentsPageProps> = ({
             <button
               type="button"
               onClick={() => onNavigate('Events')}
-              className="px-3 py-1.5 text-xs font-medium text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg transition-colors flex items-center gap-1.5"
+              className="px-3 py-1.5 text-xs font-medium text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-lg transition-colors flex items-center gap-1.5 shadow-2xs"
             >
               <Calendar className="w-3.5 h-3.5 text-slate-500" />
               <span>Events ({deptEvents.length})</span>
@@ -184,15 +185,15 @@ export const DepartmentsPage: React.FC<DepartmentsPageProps> = ({
         {/* Leadership & Department Architecture */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Department Leadership Cards */}
-          <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-3">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">
+          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/60 space-y-3">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block font-mono">
               Department Leadership
             </span>
 
             {/* Department Head */}
             <div
               onClick={() => headMember && onSelectMember(headMember)}
-              className="flex items-center gap-3 p-2 rounded-lg bg-white border border-slate-200/80 hover:border-indigo-300 transition-colors cursor-pointer group"
+              className="flex items-center gap-3 p-2.5 rounded-xl bg-white border border-slate-200/80 hover:border-slate-300 transition-colors cursor-pointer group shadow-2xs"
             >
               <Avatar
                 src={headMember?.avatarUrl}
@@ -203,14 +204,14 @@ export const DepartmentsPage: React.FC<DepartmentsPageProps> = ({
                 <p className="text-xs font-bold text-slate-900 truncate group-hover:text-indigo-600 transition-colors">
                   {activeDept.leadName}
                 </p>
-                <p className="text-[11px] text-indigo-600 font-medium truncate">Department Head</p>
+                <p className="text-[11px] text-indigo-600 font-semibold truncate">Department Head</p>
               </div>
             </div>
 
             {/* Co-Head */}
             <div
               onClick={() => coHeadMember && onSelectMember(coHeadMember)}
-              className="flex items-center gap-3 p-2 rounded-lg bg-white border border-slate-200/80 hover:border-indigo-300 transition-colors cursor-pointer group"
+              className="flex items-center gap-3 p-2.5 rounded-xl bg-white border border-slate-200/80 hover:border-slate-300 transition-colors cursor-pointer group shadow-2xs"
             >
               <Avatar
                 src={coHeadMember?.avatarUrl}
@@ -227,24 +228,24 @@ export const DepartmentsPage: React.FC<DepartmentsPageProps> = ({
           </div>
 
           {/* Department Metrics */}
-          <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-2">
+          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/60">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-2 font-mono">
               Operational Statistics
             </span>
             <div className="grid grid-cols-3 gap-2 text-center pt-1">
-              <div className="p-2.5 bg-white rounded-lg border border-slate-200">
+              <div className="p-2.5 bg-white rounded-xl border border-slate-200 shadow-2xs">
                 <p className="text-lg font-bold font-mono tabular-nums text-slate-900">
                   {deptMembers.length}
                 </p>
                 <p className="text-[10px] text-slate-500 font-medium">Members</p>
               </div>
-              <div className="p-2.5 bg-white rounded-lg border border-slate-200">
+              <div className="p-2.5 bg-white rounded-xl border border-slate-200 shadow-2xs">
                 <p className="text-lg font-bold font-mono tabular-nums text-slate-900">
                   {deptTasks.length}
                 </p>
                 <p className="text-[10px] text-slate-500 font-medium">Tasks</p>
               </div>
-              <div className="p-2.5 bg-white rounded-lg border border-slate-200">
+              <div className="p-2.5 bg-white rounded-xl border border-slate-200 shadow-2xs">
                 <p className="text-lg font-bold font-mono tabular-nums text-slate-900">
                   {deptEvents.length}
                 </p>
@@ -254,16 +255,16 @@ export const DepartmentsPage: React.FC<DepartmentsPageProps> = ({
           </div>
 
           {/* Tooling Stack */}
-          <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
-            <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/60">
+            <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 font-mono">
               <Wrench className="w-3.5 h-3.5" />
-              <span>Tooling & Environment</span>
+              <span>Tooling & Tech Stack</span>
             </div>
             <div className="flex flex-wrap gap-1.5 pt-1">
               {activeDept.tools.map((t) => (
                 <span
                   key={t}
-                  className="px-2.5 py-1 text-xs font-medium bg-white border border-slate-200 rounded-md text-slate-700 font-mono shadow-2xs"
+                  className="px-2.5 py-1 text-xs font-semibold bg-white border border-slate-200 rounded-md text-slate-700 font-mono shadow-2xs"
                 >
                   {t}
                 </span>
@@ -276,7 +277,7 @@ export const DepartmentsPage: React.FC<DepartmentsPageProps> = ({
         <div>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
             <div>
-              <h3 className="text-sm font-bold text-slate-900">
+              <h3 className="text-sm font-bold text-slate-900 tracking-tight">
                 Department Member List ({deptMembers.length})
               </h3>
               <p className="text-xs text-slate-500">
@@ -292,14 +293,14 @@ export const DepartmentsPage: React.FC<DepartmentsPageProps> = ({
                 placeholder="Search department members..."
                 value={memberSearchQuery}
                 onChange={(e) => setMemberSearchQuery(e.target.value)}
-                className="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-hidden focus:ring-1 focus:ring-indigo-500"
+                className="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-slate-900/5 focus:border-slate-400"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {filteredDeptMembers.length === 0 ? (
-              <div className="col-span-full py-8 text-center text-xs text-slate-400 bg-slate-50 rounded-lg border border-slate-100">
+              <div className="col-span-full py-8 text-center text-xs text-slate-400 bg-slate-50 rounded-xl border border-slate-100">
                 No members in this department match your search.
               </div>
             ) : (
@@ -307,7 +308,7 @@ export const DepartmentsPage: React.FC<DepartmentsPageProps> = ({
                 <div
                   key={m.id}
                   onClick={() => onSelectMember(m)}
-                  className="p-3 rounded-xl border border-slate-200/80 hover:border-indigo-300 bg-white hover:bg-slate-50/50 transition-all flex items-center justify-between gap-3 cursor-pointer group shadow-2xs"
+                  className="p-3.5 rounded-xl border border-slate-200/80 hover:border-slate-300 bg-white hover:bg-slate-50/50 transition-all flex items-center justify-between gap-3 cursor-pointer group shadow-2xs"
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <Avatar
@@ -333,7 +334,7 @@ export const DepartmentsPage: React.FC<DepartmentsPageProps> = ({
                       </div>
                     </div>
                   </div>
-                  <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-indigo-600 shrink-0 transition-colors" />
+                  <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-slate-600 shrink-0 transition-colors" />
                 </div>
               ))
             )}
@@ -344,7 +345,7 @@ export const DepartmentsPage: React.FC<DepartmentsPageProps> = ({
         <div className="pt-4 border-t border-slate-100">
           <div className="flex items-center justify-between mb-3">
             <div>
-              <h3 className="text-sm font-bold text-slate-900">
+              <h3 className="text-sm font-bold text-slate-900 tracking-tight">
                 Active Department Tasks ({deptTasks.length})
               </h3>
               <p className="text-xs text-slate-500">
@@ -354,7 +355,7 @@ export const DepartmentsPage: React.FC<DepartmentsPageProps> = ({
             <button
               type="button"
               onClick={() => onNavigate('Tasks')}
-              className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 flex items-center gap-1"
+              className="text-xs font-semibold text-slate-700 hover:text-slate-900 flex items-center gap-1"
             >
               Open all in Tasks <ChevronRight className="w-3.5 h-3.5" />
             </button>
@@ -362,7 +363,7 @@ export const DepartmentsPage: React.FC<DepartmentsPageProps> = ({
 
           <div className="space-y-2">
             {deptTasks.length === 0 ? (
-              <div className="p-4 bg-slate-50 rounded-lg text-center text-xs text-slate-400">
+              <div className="p-4 bg-slate-50 rounded-xl text-center text-xs text-slate-400 border border-slate-100">
                 No active tasks logged for this department yet.
               </div>
             ) : (
@@ -376,7 +377,7 @@ export const DepartmentsPage: React.FC<DepartmentsPageProps> = ({
                       onNavigate('Tasks');
                     }
                   }}
-                  className="p-3 rounded-lg border border-slate-100 hover:border-slate-200 bg-slate-50/50 hover:bg-white transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-2 cursor-pointer group"
+                  className="p-3.5 rounded-xl border border-slate-200/70 hover:border-slate-300 bg-white hover:bg-slate-50/50 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-2 cursor-pointer group shadow-2xs"
                 >
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 mb-1">
@@ -403,7 +404,7 @@ export const DepartmentsPage: React.FC<DepartmentsPageProps> = ({
         <div className="pt-4 border-t border-slate-100">
           <div className="flex items-center justify-between mb-3">
             <div>
-              <h3 className="text-sm font-bold text-slate-900">
+              <h3 className="text-sm font-bold text-slate-900 tracking-tight">
                 Department Events & Workshops ({deptEvents.length})
               </h3>
               <p className="text-xs text-slate-500">
@@ -413,7 +414,7 @@ export const DepartmentsPage: React.FC<DepartmentsPageProps> = ({
             <button
               type="button"
               onClick={() => onNavigate('Events')}
-              className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 flex items-center gap-1"
+              className="text-xs font-semibold text-slate-700 hover:text-slate-900 flex items-center gap-1"
             >
               Open all in Events <ChevronRight className="w-3.5 h-3.5" />
             </button>
@@ -421,7 +422,7 @@ export const DepartmentsPage: React.FC<DepartmentsPageProps> = ({
 
           <div className="space-y-2">
             {deptEvents.length === 0 ? (
-              <div className="p-4 bg-slate-50 rounded-lg text-center text-xs text-slate-400">
+              <div className="p-4 bg-slate-50 rounded-xl text-center text-xs text-slate-400 border border-slate-100">
                 No events currently scheduled under this department.
               </div>
             ) : (
@@ -435,12 +436,12 @@ export const DepartmentsPage: React.FC<DepartmentsPageProps> = ({
                       onNavigate('Events');
                     }
                   }}
-                  className="p-3 rounded-lg border border-slate-100 hover:border-slate-200 bg-slate-50/50 hover:bg-white transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-2 cursor-pointer group"
+                  className="p-3.5 rounded-xl border border-slate-200/70 hover:border-slate-300 bg-white hover:bg-slate-50/50 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-2 cursor-pointer group shadow-2xs"
                 >
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 mb-1 flex-wrap">
                       <StatusBadge status={e.status} size="sm" />
-                      <span className="text-[11px] font-mono text-slate-500">{e.date}</span>
+                      <span className="text-[11px] font-mono text-slate-600 font-medium">{e.date}</span>
                       <span className="text-[11px] font-mono text-slate-400">· {e.startTime} – {e.endTime}</span>
                     </div>
                     <p className="text-xs font-bold text-slate-900 truncate group-hover:text-indigo-600 transition-colors">
@@ -451,7 +452,9 @@ export const DepartmentsPage: React.FC<DepartmentsPageProps> = ({
                   <div className="text-[11px] text-slate-500 shrink-0 flex items-center gap-3">
                     <span>Venue: <strong className="text-slate-700">{e.venue}</strong></span>
                     <span>RSVPs: <strong className="text-slate-700">{e.attendeesCount}/{e.capacity}</strong></span>
-                    <span className="text-indigo-600 font-semibold group-hover:underline">View Details →</span>
+                    <span className="text-indigo-600 font-semibold group-hover:underline flex items-center gap-0.5">
+                      Details <ArrowUpRight className="w-3 h-3" />
+                    </span>
                   </div>
                 </div>
               ))

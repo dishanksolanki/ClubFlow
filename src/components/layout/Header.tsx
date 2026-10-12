@@ -82,14 +82,14 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header className="h-16 bg-white border-b border-slate-200/90 px-4 sm:px-6 flex items-center justify-between gap-4 sticky top-0 z-20">
+    <header className="h-16 bg-white/95 backdrop-blur-xs border-b border-slate-200/80 px-4 sm:px-6 flex items-center justify-between gap-4 sticky top-0 z-20 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
       {/* Left zone: Mobile toggle & Breadcrumb */}
       <div className="flex items-center gap-3 min-w-0">
         <button
           type="button"
           onClick={onOpenMobileMenu}
           aria-label="Open navigation menu"
-          className="lg:hidden p-2 -ml-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+          className="lg:hidden p-2 -ml-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors"
         >
           <Menu className="w-5 h-5" />
         </button>
@@ -99,17 +99,17 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             type="button"
             onClick={() => setShowClubDropdown(!showClubDropdown)}
-            className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-slate-200 hover:border-slate-300 bg-white text-xs font-semibold text-slate-700 transition-colors shadow-2xs"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-200/90 hover:border-slate-300 bg-white text-xs font-semibold text-slate-700 transition-all shadow-2xs hover:shadow-xs"
           >
-            <Building className="w-3.5 h-3.5 text-indigo-600" />
-            <span className="truncate max-w-[140px] sm:max-w-[200px]">{selectedClub}</span>
-            <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+            <Building className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+            <span className="truncate max-w-[130px] sm:max-w-[190px]">{selectedClub}</span>
+            <ChevronDown className="w-3.5 h-3.5 text-slate-400 shrink-0" />
           </button>
 
           {showClubDropdown && (
-            <div className="absolute left-0 mt-1.5 w-60 bg-white rounded-xl shadow-lg border border-slate-200 py-1.5 z-40">
-              <div className="px-3 py-1 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
-                Select Organization
+            <div className="absolute left-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-slate-200/90 py-1.5 z-40 animate-in fade-in duration-100">
+              <div className="px-3 py-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono">
+                Active Organization
               </div>
               {clubsList.map((club) => (
                 <button
@@ -131,56 +131,60 @@ export const Header: React.FC<HeaderProps> = ({
           )}
         </div>
 
-        <div className="hidden sm:flex items-center text-xs text-slate-400">
-          <span className="mx-2">/</span>
-          <span className="font-semibold text-slate-800">{activeTab}</span>
+        <div className="hidden sm:flex items-center text-xs text-slate-400 font-medium">
+          <span className="mx-2 text-slate-300">/</span>
+          <span className="font-semibold text-slate-900">{activeTab}</span>
         </div>
       </div>
 
-      {/* Middle zone: Quick Search */}
+      {/* Middle zone: Linear-style Search Bar */}
       <div className="flex-1 max-w-md hidden md:block">
         <div className="relative">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+          <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
           <input
             type="text"
             placeholder="Search tasks, events, members..."
             value={searchQuery}
             onChange={(e) => onSearchQueryChange(e.target.value)}
-            className="w-full pl-9 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-hidden focus:ring-1 focus:ring-indigo-500 focus:bg-white transition-all"
+            className="w-full pl-8 pr-12 py-1.5 text-xs bg-slate-50 hover:bg-slate-100/60 focus:bg-white border border-slate-200/90 focus:border-slate-400 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-slate-900/5 transition-all shadow-2xs"
           />
-          {searchQuery && (
+          {searchQuery ? (
             <button
               type="button"
               onClick={() => onSearchQueryChange('')}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-600"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs font-semibold text-slate-400 hover:text-slate-600 w-4 h-4 flex items-center justify-center rounded"
             >
               ×
             </button>
+          ) : (
+            <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none hidden lg:flex items-center gap-0.5 text-[10px] font-mono text-slate-400 bg-white border border-slate-200 px-1.5 py-0.2 rounded shadow-2xs">
+              <span>⌘</span><span>K</span>
+            </div>
           )}
         </div>
       </div>
 
       {/* Right zone: Notifications & User profile */}
-      <div className="flex items-center gap-2.5 shrink-0">
+      <div className="flex items-center gap-2 sm:gap-3 shrink-0">
         {/* Notifications Popover */}
         <div className="relative" ref={notifRef}>
           <button
             type="button"
             onClick={() => setShowNotifications(!showNotifications)}
             aria-label="View notifications"
-            className="relative p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+            className="relative p-2 text-slate-500 hover:text-slate-900 hover:bg-slate-100/80 rounded-lg transition-colors border border-transparent hover:border-slate-200/60"
           >
             <Bell className="w-4 h-4" />
             {unreadCount > 0 && (
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-indigo-600" />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-indigo-600 ring-2 ring-white" />
             )}
           </button>
 
           {showNotifications && (
-            <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden z-40 animate-in fade-in zoom-in-95 duration-100">
+            <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-slate-200/90 overflow-hidden z-40 animate-in fade-in duration-100">
               <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-slate-50/70">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-semibold text-slate-900">Notifications</span>
+                  <span className="text-xs font-bold text-slate-900">Notifications</span>
                   {unreadCount > 0 && (
                     <span className="px-1.5 py-0.5 text-[10px] font-mono tabular-nums font-semibold bg-indigo-100 text-indigo-700 rounded-md">
                       {unreadCount} new
@@ -191,7 +195,7 @@ export const Header: React.FC<HeaderProps> = ({
                   <button
                     type="button"
                     onClick={onClearAllNotifications}
-                    className="text-[11px] text-indigo-600 hover:text-indigo-800 font-medium"
+                    className="text-[11px] text-indigo-600 hover:text-indigo-800 font-semibold"
                   >
                     Mark all read
                   </button>
@@ -201,7 +205,7 @@ export const Header: React.FC<HeaderProps> = ({
               <div className="max-h-80 overflow-y-auto divide-y divide-slate-100">
                 {notifications.length === 0 ? (
                   <div className="py-8 text-center text-xs text-slate-400">
-                    No notifications right now
+                    No new notifications right now
                   </div>
                 ) : (
                   notifications.map((notif) => (
@@ -224,7 +228,7 @@ export const Header: React.FC<HeaderProps> = ({
                           <p className="text-xs font-semibold text-slate-900 truncate">
                             {notif.title}
                           </p>
-                          <span className="text-[10px] text-slate-400 whitespace-nowrap">
+                          <span className="text-[10px] text-slate-400 whitespace-nowrap font-mono">
                             {notif.timestamp}
                           </span>
                         </div>
@@ -244,7 +248,7 @@ export const Header: React.FC<HeaderProps> = ({
         <button
           type="button"
           onClick={() => onTabChange('Profile')}
-          className="flex items-center gap-2 p-1.5 hover:bg-slate-100 rounded-lg transition-colors"
+          className="flex items-center gap-2.5 p-1.5 sm:px-2.5 hover:bg-slate-100/70 border border-slate-200/60 rounded-xl transition-all shadow-2xs"
         >
           <Avatar
             src={currentUser.avatarUrl}
@@ -253,10 +257,10 @@ export const Header: React.FC<HeaderProps> = ({
             size="sm"
           />
           <div className="hidden sm:block text-left">
-            <p className="text-xs font-semibold text-slate-900 leading-none">
-              {currentUser.name}
+            <p className="text-xs font-bold text-slate-900 leading-none">
+              {currentUser.name.split(' ')[0]}
             </p>
-            <p className="text-[10px] text-slate-500 leading-none mt-1">
+            <p className="text-[10px] text-slate-400 leading-none mt-1 font-medium truncate max-w-[90px]">
               {currentUser.role.split('&')[0].trim()}
             </p>
           </div>

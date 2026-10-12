@@ -9,7 +9,10 @@ import {
   ArrowUpDown,
   Filter,
   Eye,
-  Calendar,
+  CheckCircle2,
+  AlertCircle,
+  FileText,
+  RotateCcw,
 } from 'lucide-react';
 import { DepartmentType, Member, Task, TaskPriority, TaskStatus } from '../types';
 import { StatusBadge } from '../components/common/StatusBadge';
@@ -71,11 +74,9 @@ export const TasksPage: React.FC<TasksPageProps> = ({
     if (lower.includes('today')) return 0;
     if (lower.includes('tomorrow')) return 1;
 
-    // Try parsing standard dates like "Oct 15, 2026" or "Oct 04, 2026"
     const parsed = Date.parse(deadlineStr);
     if (!isNaN(parsed)) return parsed;
 
-    // Fallback: search for day number
     const match = deadlineStr.match(/\d+/);
     if (match) return parseInt(match[0], 10);
     return 999;
@@ -126,6 +127,12 @@ export const TasksPage: React.FC<TasksPageProps> = ({
     setSelectedTask(updatedTask);
   };
 
+  // Metric counts
+  const inProgressCount = tasks.filter((t) => t.status === 'In Progress').length;
+  const submittedCount = tasks.filter((t) => t.status === 'Submitted').length;
+  const completedCount = tasks.filter((t) => t.status === 'Completed' || t.status === 'Approved').length;
+  const overdueCount = tasks.filter((t) => t.status === 'Overdue').length;
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -141,14 +148,14 @@ export const TasksPage: React.FC<TasksPageProps> = ({
 
         <div className="flex items-center gap-2 self-start sm:self-auto">
           {/* View Mode Toggle */}
-          <div className="flex items-center bg-slate-100 p-1 rounded-lg">
+          <div className="flex items-center bg-slate-100/90 p-1 rounded-xl border border-slate-200/60 shadow-2xs">
             <button
               type="button"
               onClick={() => setViewMode('list')}
               aria-label="Table list view"
-              className={`p-1.5 rounded-md transition-colors ${
+              className={`p-1.5 rounded-lg transition-all ${
                 viewMode === 'list'
-                  ? 'bg-white text-slate-900 shadow-2xs'
+                  ? 'bg-white text-slate-900 shadow-xs font-semibold'
                   : 'text-slate-500 hover:text-slate-900'
               }`}
             >
@@ -158,9 +165,9 @@ export const TasksPage: React.FC<TasksPageProps> = ({
               type="button"
               onClick={() => setViewMode('kanban')}
               aria-label="Kanban board view"
-              className={`p-1.5 rounded-md transition-colors ${
+              className={`p-1.5 rounded-lg transition-all ${
                 viewMode === 'kanban'
-                  ? 'bg-white text-slate-900 shadow-2xs'
+                  ? 'bg-white text-slate-900 shadow-xs font-semibold'
                   : 'text-slate-500 hover:text-slate-900'
               }`}
             >
@@ -171,16 +178,40 @@ export const TasksPage: React.FC<TasksPageProps> = ({
           <button
             type="button"
             onClick={onOpenCreateTask}
-            className="px-4 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors flex items-center gap-1.5 shadow-2xs"
+            className="px-3.5 py-2 text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 rounded-xl transition-all flex items-center gap-1.5 shadow-xs"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-4 h-4 text-indigo-400" />
             <span>Add Task</span>
           </button>
         </div>
       </div>
 
+      {/* Task Summary Metrics Strip */}
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+        <div className="bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-2xs">
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono">Total Tasks</span>
+          <p className="text-xl font-bold font-mono tabular-nums text-slate-900 mt-1">{tasks.length}</p>
+        </div>
+        <div className="bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-2xs">
+          <span className="text-[10px] font-bold text-sky-700 uppercase tracking-wider font-mono">In Progress</span>
+          <p className="text-xl font-bold font-mono tabular-nums text-sky-700 mt-1">{inProgressCount}</p>
+        </div>
+        <div className="bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-2xs">
+          <span className="text-[10px] font-bold text-purple-700 uppercase tracking-wider font-mono">Submitted</span>
+          <p className="text-xl font-bold font-mono tabular-nums text-purple-700 mt-1">{submittedCount}</p>
+        </div>
+        <div className="bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-2xs">
+          <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider font-mono">Completed</span>
+          <p className="text-xl font-bold font-mono tabular-nums text-emerald-700 mt-1">{completedCount}</p>
+        </div>
+        <div className="bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-2xs col-span-2 sm:col-span-1">
+          <span className="text-[10px] font-bold text-rose-700 uppercase tracking-wider font-mono">Overdue</span>
+          <p className="text-xl font-bold font-mono tabular-nums text-rose-700 mt-1">{overdueCount}</p>
+        </div>
+      </div>
+
       {/* Filter, Search, and Sort Bar */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200/90 shadow-2xs space-y-3">
+      <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-[0_1px_2px_rgba(0,0,0,0.03)] space-y-3">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
           {/* Filters Row */}
           <div className="flex flex-wrap items-center gap-2.5">
@@ -190,7 +221,7 @@ export const TasksPage: React.FC<TasksPageProps> = ({
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-700 focus:outline-hidden focus:ring-1 focus:ring-indigo-500 font-medium"
+                className="px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-700 focus:outline-hidden focus:ring-2 focus:ring-slate-900/5 focus:border-slate-400 font-medium"
               >
                 <option value="All">All Statuses ({tasks.length})</option>
                 {allStatuses.map((st) => (
@@ -207,7 +238,7 @@ export const TasksPage: React.FC<TasksPageProps> = ({
               <select
                 value={deptFilter}
                 onChange={(e) => setDeptFilter(e.target.value)}
-                className="px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-700 focus:outline-hidden focus:ring-1 focus:ring-indigo-500 font-medium"
+                className="px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-700 focus:outline-hidden focus:ring-2 focus:ring-slate-900/5 focus:border-slate-400 font-medium"
               >
                 <option value="All">All Departments</option>
                 {departments.map((d) => (
@@ -224,7 +255,7 @@ export const TasksPage: React.FC<TasksPageProps> = ({
               <select
                 value={priorityFilter}
                 onChange={(e) => setPriorityFilter(e.target.value)}
-                className="px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-700 focus:outline-hidden focus:ring-1 focus:ring-indigo-500 font-medium"
+                className="px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-700 focus:outline-hidden focus:ring-2 focus:ring-slate-900/5 focus:border-slate-400 font-medium"
               >
                 <option value="All">All Priorities</option>
                 {allPriorities.map((p) => (
@@ -241,7 +272,7 @@ export const TasksPage: React.FC<TasksPageProps> = ({
               <select
                 value={sortOption}
                 onChange={(e) => setSortOption(e.target.value)}
-                className="px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-700 focus:outline-hidden focus:ring-1 focus:ring-indigo-500 font-medium"
+                className="px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-700 focus:outline-hidden focus:ring-2 focus:ring-slate-900/5 focus:border-slate-400 font-medium"
               >
                 <option value="deadline-asc">Sort: Deadline (Earliest)</option>
                 <option value="deadline-desc">Sort: Deadline (Latest)</option>
@@ -260,7 +291,7 @@ export const TasksPage: React.FC<TasksPageProps> = ({
               placeholder="Search tasks, title, assignee..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-hidden focus:ring-1 focus:ring-indigo-500"
+              className="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-slate-900/5 focus:border-slate-400"
             />
           </div>
         </div>
@@ -278,9 +309,10 @@ export const TasksPage: React.FC<TasksPageProps> = ({
                 setPriorityFilter('All');
                 setSearchQuery('');
               }}
-              className="text-indigo-600 hover:text-indigo-800 font-medium"
+              className="text-indigo-600 hover:text-indigo-800 font-semibold flex items-center gap-1"
             >
-              Reset filters
+              <RotateCcw className="w-3 h-3" />
+              <span>Reset filters</span>
             </button>
           </div>
         )}
@@ -288,11 +320,11 @@ export const TasksPage: React.FC<TasksPageProps> = ({
 
       {/* Render Table List View */}
       {viewMode === 'list' ? (
-        <div className="bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden">
+        <div className="bg-white rounded-xl border border-slate-200/80 shadow-[0_1px_2px_rgba(0,0,0,0.03)] overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr className="bg-slate-50/80 border-b border-slate-200/80 text-slate-500 font-semibold uppercase tracking-wider text-[11px]">
+                <tr className="bg-slate-50/80 border-b border-slate-200/80 text-slate-500 font-bold uppercase tracking-wider text-[10px] font-mono">
                   <th className="py-3 px-4">Task Title</th>
                   <th className="py-3 px-4">Department</th>
                   <th className="py-3 px-4">Assigned To</th>
@@ -307,8 +339,10 @@ export const TasksPage: React.FC<TasksPageProps> = ({
               <tbody className="divide-y divide-slate-100">
                 {sortedTasks.length === 0 ? (
                   <tr>
-                    <td colSpan={9} className="py-12 text-center text-slate-400">
-                      No matching tasks found. Try adjusting your filters.
+                    <td colSpan={9} className="py-16 text-center">
+                      <FileText className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                      <p className="text-xs font-semibold text-slate-700">No matching tasks found</p>
+                      <p className="text-[11px] text-slate-400 mt-0.5">Try resetting or broadening your filter criteria.</p>
                     </td>
                   </tr>
                 ) : (
@@ -316,7 +350,7 @@ export const TasksPage: React.FC<TasksPageProps> = ({
                     <tr
                       key={t.id}
                       onClick={() => handleOpenTaskDetail(t)}
-                      className="hover:bg-slate-50/70 transition-colors cursor-pointer group"
+                      className="hover:bg-slate-50/80 transition-colors cursor-pointer group"
                     >
                       {/* Task Title & Description snippet */}
                       <td className="py-3.5 px-4 min-w-[220px]">
@@ -330,7 +364,9 @@ export const TasksPage: React.FC<TasksPageProps> = ({
 
                       {/* Department */}
                       <td className="py-3.5 px-4 whitespace-nowrap text-slate-700 font-medium">
-                        {t.department}
+                        <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-medium text-[11px]">
+                          {t.department}
+                        </span>
                       </td>
 
                       {/* Assigned To */}
@@ -341,7 +377,7 @@ export const TasksPage: React.FC<TasksPageProps> = ({
                             name={t.assignedTo}
                             size="xs"
                           />
-                          <span className="font-medium text-slate-800">{t.assignedTo}</span>
+                          <span className="font-semibold text-slate-800">{t.assignedTo}</span>
                         </div>
                       </td>
 
@@ -351,7 +387,7 @@ export const TasksPage: React.FC<TasksPageProps> = ({
                       </td>
 
                       {/* Created Date */}
-                      <td className="py-3.5 px-4 whitespace-nowrap font-mono text-slate-500 text-[11px]">
+                      <td className="py-3.5 px-4 whitespace-nowrap font-mono text-slate-400 text-[11px]">
                         {t.createdAt}
                       </td>
 
@@ -381,7 +417,7 @@ export const TasksPage: React.FC<TasksPageProps> = ({
                             onChange={(e) =>
                               onUpdateTaskStatus(t.id, e.target.value as TaskStatus)
                             }
-                            className="text-[11px] font-semibold px-2 py-1 rounded-md border border-slate-200 bg-white hover:border-slate-300 focus:outline-hidden focus:ring-1 focus:ring-indigo-500 text-slate-800 cursor-pointer"
+                            className="text-[11px] font-semibold px-2 py-1 rounded-md border border-slate-200 bg-white hover:border-slate-300 focus:outline-hidden focus:ring-1 focus:ring-slate-900/10 text-slate-800 cursor-pointer shadow-2xs"
                           >
                             {allStatuses.map((st) => (
                               <option key={st} value={st}>
@@ -394,7 +430,7 @@ export const TasksPage: React.FC<TasksPageProps> = ({
                             type="button"
                             onClick={() => handleOpenTaskDetail(t)}
                             title="View task details"
-                            className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-slate-100 rounded-md transition-colors"
+                            className="p-1.5 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-md transition-colors"
                           >
                             <Eye className="w-3.5 h-3.5" />
                           </button>
@@ -415,11 +451,11 @@ export const TasksPage: React.FC<TasksPageProps> = ({
             return (
               <div
                 key={status}
-                className="bg-slate-50/90 rounded-xl border border-slate-200 p-3 min-h-[380px] flex flex-col"
+                className="bg-slate-100/60 rounded-xl border border-slate-200/80 p-3 min-h-[380px] flex flex-col"
               >
                 <div className="flex items-center justify-between mb-3 px-1">
                   <span className="text-xs font-bold text-slate-800">{status}</span>
-                  <span className="text-xs font-mono font-semibold px-1.5 py-0.5 rounded-md bg-white border border-slate-200 text-slate-600">
+                  <span className="text-xs font-mono font-semibold px-1.5 py-0.5 rounded-md bg-white border border-slate-200 text-slate-600 shadow-2xs">
                     {columnTasks.length}
                   </span>
                 </div>
@@ -434,10 +470,10 @@ export const TasksPage: React.FC<TasksPageProps> = ({
                       <div
                         key={t.id}
                         onClick={() => handleOpenTaskDetail(t)}
-                        className="bg-white p-3 rounded-lg border border-slate-200 shadow-2xs space-y-2 hover:border-indigo-300 hover:shadow-xs transition-all cursor-pointer group"
+                        className="bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-2xs space-y-2 hover:border-slate-300 hover:shadow-xs transition-all cursor-pointer group"
                       >
                         <div className="flex items-center justify-between gap-1">
-                          <span className="text-[10px] font-semibold text-slate-500">
+                          <span className="text-[10px] font-semibold text-slate-500 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-200/60">
                             {t.department}
                           </span>
                           <StatusBadge status={t.priority} size="sm" />
@@ -469,7 +505,7 @@ export const TasksPage: React.FC<TasksPageProps> = ({
                             onChange={(e) =>
                               onUpdateTaskStatus(t.id, e.target.value as TaskStatus)
                             }
-                            className="text-[10px] px-1.5 py-0.5 bg-slate-50 border border-slate-200 rounded-md text-slate-700"
+                            className="text-[10px] px-1.5 py-0.5 bg-slate-50 border border-slate-200 rounded-md text-slate-700 font-medium"
                           >
                             {allStatuses.map((s) => (
                               <option key={s} value={s}>

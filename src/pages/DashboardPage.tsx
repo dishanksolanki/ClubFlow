@@ -9,6 +9,9 @@ import {
   ChevronRight,
   MapPin,
   Sparkles,
+  Users,
+  Activity,
+  Layers,
 } from 'lucide-react';
 import { Member, Task, ClubEvent, WorkingHourRecord, Announcement } from '../types';
 import { Avatar } from '../components/common/Avatar';
@@ -58,32 +61,57 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
 
   const myTasks = tasks.filter((t) => t.assignedTo === currentUser.name || t.assignedTo.includes('Dishank'));
 
+  // Department distribution calculation
+  const deptBreakdown = [
+    { name: 'Technical', count: tasks.filter((t) => t.department === 'Technical').length, color: 'bg-indigo-500' },
+    { name: 'Design', count: tasks.filter((t) => t.department === 'Design').length, color: 'bg-violet-500' },
+    { name: 'Marketing', count: tasks.filter((t) => t.department === 'Marketing').length, color: 'bg-pink-500' },
+    { name: 'Events', count: tasks.filter((t) => t.department === 'Event Management').length, color: 'bg-emerald-500' },
+    { name: 'Media', count: tasks.filter((t) => t.department === 'Media').length, color: 'bg-amber-500' },
+  ];
+  const totalTrackedDeptTasks = deptBreakdown.reduce((sum, d) => sum + d.count, 0) || 1;
+
   return (
     <div className="space-y-6">
       {/* Welcome Section & Quick Action Bar */}
-      <div className="bg-white rounded-xl border border-slate-200/90 p-5 sm:p-6 shadow-2xs">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 text-xs font-semibold text-indigo-600 mb-1">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Fall Term 2026 · Executive Workspace</span>
+      <div className="bg-white rounded-2xl border border-slate-200/80 p-5 sm:p-6 shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+          <div className="flex items-start gap-4">
+            <div className="hidden sm:block shrink-0 pt-0.5">
+              <Avatar
+                src={currentUser.avatarUrl}
+                name={currentUser.name}
+                initials={currentUser.initials}
+                size="lg"
+                className="ring-2 ring-slate-100"
+              />
             </div>
-            <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
-              Welcome back, {currentUser.name.split(' ')[0]}
-            </h1>
-            <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl">
-              Club operations summary: <strong className="text-slate-800">{upcomingCount} upcoming</strong> and{' '}
-              <strong className="text-slate-800">{ongoingCount} ongoing</strong> events across departments, with{' '}
-              <strong className="text-slate-800">{pendingTasks.length} pending tasks</strong> under active tracking.
-            </p>
+            <div>
+              <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 mb-1">
+                <span className="inline-flex items-center gap-1.5 text-indigo-700 bg-indigo-50/80 border border-indigo-100/80 px-2 py-0.5 rounded-md font-mono text-[11px]">
+                  <Sparkles className="w-3 h-3 text-indigo-600" />
+                  Fall Term 2026
+                </span>
+                <span>·</span>
+                <span>Executive Operations Console</span>
+              </div>
+              <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+                Welcome back, {currentUser.name.split(' ')[0]}
+              </h1>
+              <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl leading-relaxed">
+                Campus operations status: <strong className="text-slate-800 font-semibold">{upcomingCount} upcoming</strong> and{' '}
+                <strong className="text-slate-800 font-semibold">{ongoingCount} ongoing</strong> events across departments, with{' '}
+                <strong className="text-slate-800 font-semibold">{pendingTasks.length} pending deliverables</strong> under active tracking.
+              </p>
+            </div>
           </div>
 
-          {/* Quick Actions */}
-          <div className="flex flex-wrap items-center gap-2">
+          {/* Quick Actions (Linear/Vercel styled) */}
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
             <button
               type="button"
               onClick={onOpenLogHours}
-              className="px-3 py-2 text-xs font-medium text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg transition-colors flex items-center gap-1.5"
+              className="px-3 py-2 text-xs font-medium text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-lg transition-all shadow-2xs flex items-center gap-1.5"
             >
               <Clock className="w-3.5 h-3.5 text-slate-500" />
               <span>Log Hours</span>
@@ -91,7 +119,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
             <button
               type="button"
               onClick={onOpenCreateTask}
-              className="px-3 py-2 text-xs font-medium text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg transition-colors flex items-center gap-1.5"
+              className="px-3 py-2 text-xs font-medium text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-lg transition-all shadow-2xs flex items-center gap-1.5"
             >
               <Plus className="w-3.5 h-3.5 text-slate-500" />
               <span>New Task</span>
@@ -99,19 +127,47 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
             <button
               type="button"
               onClick={onOpenCreateAnnouncement}
-              className="px-3 py-2 text-xs font-medium text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg transition-colors flex items-center gap-1.5"
+              className="px-3 py-2 text-xs font-medium text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-lg transition-all shadow-2xs flex items-center gap-1.5"
             >
               <Plus className="w-3.5 h-3.5 text-slate-500" />
-              <span>Announcement</span>
+              <span>Memo</span>
             </button>
             <button
               type="button"
               onClick={onOpenCreateEvent}
-              className="px-3 py-2 text-xs font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors flex items-center gap-1.5 shadow-2xs"
+              className="px-3.5 py-2 text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 rounded-lg transition-all flex items-center gap-1.5 shadow-xs"
             >
-              <Calendar className="w-3.5 h-3.5" />
+              <Calendar className="w-3.5 h-3.5 text-indigo-400" />
               <span>Schedule Event</span>
             </button>
+          </div>
+        </div>
+
+        {/* Workload Distribution Mini-Bar */}
+        <div className="mt-5 pt-4 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+          <div className="flex items-center gap-2 text-slate-500 font-medium">
+            <Layers className="w-3.5 h-3.5 text-slate-400" />
+            <span>Task Distribution by Committee:</span>
+          </div>
+          <div className="flex-1 max-w-md mx-0 sm:mx-3">
+            <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden flex">
+              {deptBreakdown.map((d) => (
+                <div
+                  key={d.name}
+                  style={{ width: `${(d.count / totalTrackedDeptTasks) * 100}%` }}
+                  className={`${d.color} h-full transition-all`}
+                  title={`${d.name}: ${d.count} tasks`}
+                />
+              ))}
+            </div>
+          </div>
+          <div className="flex items-center gap-3 text-[11px] text-slate-500 flex-wrap">
+            {deptBreakdown.map((d) => (
+              <span key={d.name} className="flex items-center gap-1">
+                <span className={`w-2 h-2 rounded-full ${d.color}`} />
+                <span>{d.name} ({d.count})</span>
+              </span>
+            ))}
           </div>
         </div>
       </div>
@@ -121,10 +177,10 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
         {/* Attendance */}
         <div
           onClick={() => onNavigate('Attendance')}
-          className="bg-white p-5 rounded-xl border border-slate-200/90 shadow-2xs hover:border-slate-300 transition-all cursor-pointer group"
+          className="bg-white p-5 rounded-xl border border-slate-200/80 shadow-[0_1px_2px_rgba(0,0,0,0.03)] hover:border-slate-300 hover:shadow-xs transition-all cursor-pointer group"
         >
           <div className="flex items-center justify-between text-slate-500 mb-3">
-            <span className="text-xs font-medium">Attendance Rate</span>
+            <span className="text-xs font-semibold text-slate-600">Attendance Rate</span>
             <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
               <Award className="w-4 h-4" />
             </div>
@@ -133,10 +189,10 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
             <span className="text-2xl font-bold font-mono tabular-nums text-slate-900">
               87%
             </span>
-            <span className="text-xs text-emerald-600 font-medium">14 of 16 sessions</span>
+            <span className="text-xs text-emerald-600 font-semibold font-mono">14 / 16 sessions</span>
           </div>
           <div className="mt-3 flex items-center justify-between text-[11px] text-slate-400 pt-3 border-t border-slate-100">
-            <span>Required min: 75%</span>
+            <span>Minimum required: 75%</span>
             <span className="group-hover:text-indigo-600 font-medium flex items-center gap-0.5 transition-colors">
               View Log <ArrowUpRight className="w-3 h-3" />
             </span>
@@ -146,10 +202,10 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
         {/* Pending Tasks */}
         <div
           onClick={() => onNavigate('Tasks')}
-          className="bg-white p-5 rounded-xl border border-slate-200/90 shadow-2xs hover:border-slate-300 transition-all cursor-pointer group"
+          className="bg-white p-5 rounded-xl border border-slate-200/80 shadow-[0_1px_2px_rgba(0,0,0,0.03)] hover:border-slate-300 hover:shadow-xs transition-all cursor-pointer group"
         >
           <div className="flex items-center justify-between text-slate-500 mb-3">
-            <span className="text-xs font-medium">Pending Tasks</span>
+            <span className="text-xs font-semibold text-slate-600">Pending Tasks</span>
             <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
               <CheckSquare className="w-4 h-4" />
             </div>
@@ -158,7 +214,9 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
             <span className="text-2xl font-bold font-mono tabular-nums text-slate-900">
               {pendingTasks.length}
             </span>
-            <span className="text-xs text-amber-600 font-medium">1 due today</span>
+            <span className="text-xs text-amber-700 font-semibold font-mono bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200/60">
+              1 due today
+            </span>
           </div>
           <div className="mt-3 flex items-center justify-between text-[11px] text-slate-400 pt-3 border-t border-slate-100">
             <span>Across 4 departments</span>
@@ -171,10 +229,10 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
         {/* Completed Tasks */}
         <div
           onClick={() => onNavigate('Tasks')}
-          className="bg-white p-5 rounded-xl border border-slate-200/90 shadow-2xs hover:border-slate-300 transition-all cursor-pointer group"
+          className="bg-white p-5 rounded-xl border border-slate-200/80 shadow-[0_1px_2px_rgba(0,0,0,0.03)] hover:border-slate-300 hover:shadow-xs transition-all cursor-pointer group"
         >
           <div className="flex items-center justify-between text-slate-500 mb-3">
-            <span className="text-xs font-medium">Completed Tasks</span>
+            <span className="text-xs font-semibold text-slate-600">Completed Tasks</span>
             <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
               <CheckSquare className="w-4 h-4" />
             </div>
@@ -183,10 +241,10 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
             <span className="text-2xl font-bold font-mono tabular-nums text-slate-900">
               {completedTasks.length}
             </span>
-            <span className="text-xs text-indigo-600 font-medium">Verified deliverables</span>
+            <span className="text-xs text-indigo-600 font-semibold">Verified deliverables</span>
           </div>
           <div className="mt-3 flex items-center justify-between text-[11px] text-slate-400 pt-3 border-t border-slate-100">
-            <span>Across all departments</span>
+            <span>Review board signed off</span>
             <span className="group-hover:text-indigo-600 font-medium flex items-center gap-0.5 transition-colors">
               History <ArrowUpRight className="w-3 h-3" />
             </span>
@@ -196,10 +254,10 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
         {/* Working Hours */}
         <div
           onClick={() => onNavigate('Working Hours')}
-          className="bg-white p-5 rounded-xl border border-slate-200/90 shadow-2xs hover:border-slate-300 transition-all cursor-pointer group"
+          className="bg-white p-5 rounded-xl border border-slate-200/80 shadow-[0_1px_2px_rgba(0,0,0,0.03)] hover:border-slate-300 hover:shadow-xs transition-all cursor-pointer group"
         >
           <div className="flex items-center justify-between text-slate-500 mb-3">
-            <span className="text-xs font-medium">Working Hours</span>
+            <span className="text-xs font-semibold text-slate-600">Working Hours</span>
             <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
               <Clock className="w-4 h-4" />
             </div>
@@ -208,7 +266,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
             <span className="text-2xl font-bold font-mono tabular-nums text-slate-900">
               32h
             </span>
-            <span className="text-xs text-blue-600 font-medium">Goal: 40h/term</span>
+            <span className="text-xs text-blue-600 font-semibold font-mono">Goal: 40h/term</span>
           </div>
           <div className="mt-3 flex items-center justify-between text-[11px] text-slate-400 pt-3 border-t border-slate-100">
             <span>80% target attained</span>
@@ -220,42 +278,42 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
       </div>
 
       {/* Events Operational Overview Strip */}
-      <div className="bg-slate-900 text-white p-4 rounded-xl shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="bg-slate-900 text-white p-4 rounded-xl shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 border border-slate-800">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center shrink-0">
             <Calendar className="w-4 h-4" />
           </div>
           <div>
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-200">
-              Club Events Tracker
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-200 font-mono">
+              Events Coordination Track
             </h3>
             <p className="text-[11px] text-slate-400">
-              Coordinated calendar spanning workshops, demos, and campus keynotes
+              Coordinated calendar spanning workshops, project demos, and campus meetings
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
-          <div className="px-3 py-1 bg-slate-800 border border-slate-700 rounded-lg text-xs font-mono">
+          <div className="px-3 py-1 bg-slate-800 border border-slate-700/80 rounded-lg text-xs font-mono">
             <span className="text-slate-400">Total: </span>
             <strong className="text-white">{totalEventsCount}</strong>
           </div>
-          <div className="px-3 py-1 bg-blue-950 border border-blue-800 text-blue-300 rounded-lg text-xs font-mono">
+          <div className="px-3 py-1 bg-blue-950/80 border border-blue-800 text-blue-300 rounded-lg text-xs font-mono">
             <span>Upcoming: </span>
             <strong className="text-white">{upcomingCount}</strong>
           </div>
-          <div className="px-3 py-1 bg-emerald-950 border border-emerald-800 text-emerald-300 rounded-lg text-xs font-mono">
+          <div className="px-3 py-1 bg-emerald-950/80 border border-emerald-800 text-emerald-300 rounded-lg text-xs font-mono">
             <span>Ongoing: </span>
             <strong className="text-white">{ongoingCount}</strong>
           </div>
-          <div className="px-3 py-1 bg-slate-800 border border-slate-700 text-slate-300 rounded-lg text-xs font-mono">
+          <div className="px-3 py-1 bg-slate-800 border border-slate-700/80 text-slate-300 rounded-lg text-xs font-mono">
             <span>Past: </span>
             <strong className="text-white">{pastEventsCount}</strong>
           </div>
           <button
             type="button"
             onClick={() => onNavigate('Events')}
-            className="px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-semibold transition-colors flex items-center gap-1 shrink-0 ml-auto sm:ml-0"
+            className="px-3 py-1 bg-white hover:bg-slate-100 text-slate-900 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1 shrink-0 ml-auto sm:ml-0 shadow-2xs"
           >
             <span>Events Board</span>
             <ArrowUpRight className="w-3.5 h-3.5" />
@@ -268,11 +326,11 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
         {/* Upcoming Events Column (2 cols) */}
         <div className="lg:col-span-2 space-y-6">
           {/* Upcoming Events Box */}
-          <div className="bg-white rounded-xl border border-slate-200/90 p-5 shadow-2xs">
+          <div className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
             <div className="flex items-center justify-between mb-4">
               <div>
                 <div className="flex items-center gap-2">
-                  <h2 className="text-base font-bold text-slate-900">Upcoming Events</h2>
+                  <h2 className="text-base font-bold text-slate-900 tracking-tight">Upcoming Events</h2>
                   <span className="text-xs font-mono font-semibold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-100">
                     {upcomingEvents.length} active
                   </span>
@@ -284,7 +342,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
               <button
                 type="button"
                 onClick={() => onNavigate('Events')}
-                className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 flex items-center gap-1 shrink-0"
+                className="text-xs font-semibold text-slate-700 hover:text-slate-900 flex items-center gap-1 shrink-0 px-2.5 py-1 rounded-md hover:bg-slate-50 transition-colors"
               >
                 View all ({totalEventsCount}) <ChevronRight className="w-3.5 h-3.5" />
               </button>
@@ -292,7 +350,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
 
             <div className="space-y-3">
               {upcomingEvents.length === 0 ? (
-                <div className="p-8 text-center bg-slate-50 rounded-lg border border-slate-100">
+                <div className="p-8 text-center bg-slate-50 rounded-xl border border-slate-100">
                   <Calendar className="w-8 h-8 text-slate-300 mx-auto mb-2" />
                   <p className="text-xs font-semibold text-slate-700">No upcoming events scheduled</p>
                   <p className="text-[11px] text-slate-400 mt-0.5">Schedule a new workshop or general meeting.</p>
@@ -308,13 +366,13 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                         onNavigate('Events');
                       }
                     }}
-                    className="p-4 rounded-xl border border-slate-200/80 hover:border-indigo-400 hover:bg-indigo-50/20 bg-white transition-all cursor-pointer group shadow-2xs"
+                    className="p-4 rounded-xl border border-slate-200/80 hover:border-slate-300 hover:shadow-xs bg-white transition-all cursor-pointer group shadow-2xs"
                   >
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                       <div className="min-w-0">
-                        <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        <div className="flex items-center gap-2 mb-1.5 flex-wrap">
                           <StatusBadge status={evt.status} size="sm" />
-                          <span className="text-xs text-slate-700 font-semibold bg-slate-50 px-2 py-0.5 rounded-md border border-slate-200">
+                          <span className="text-xs text-slate-600 font-semibold bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200/80">
                             {evt.department}
                           </span>
                         </div>
@@ -323,7 +381,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                         </h3>
                       </div>
                       <div className="text-left sm:text-right shrink-0">
-                        <div className="text-xs font-semibold text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-md font-mono inline-block">
+                        <div className="text-xs font-semibold text-slate-800 bg-slate-50 border border-slate-200/70 px-2.5 py-1 rounded-md font-mono inline-block">
                           {evt.date}
                         </div>
                         <div className="text-[11px] text-slate-500 font-mono mt-1">
@@ -344,7 +402,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                         <span className="text-slate-600">
                           Lead: <strong className="text-slate-800">{evt.organizer}</strong>
                         </span>
-                        <span className="text-xs font-semibold text-indigo-600 flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
+                        <span className="text-xs font-semibold text-indigo-600 flex items-center gap-0.5 group-hover:translate-x-0.5 transition-transform">
                           Details <ArrowUpRight className="w-3 h-3" />
                         </span>
                       </div>
@@ -356,16 +414,16 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           </div>
 
           {/* Task Progress (Assigned to Me) */}
-          <div className="bg-white rounded-xl border border-slate-200/90 p-5 shadow-2xs">
+          <div className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h2 className="text-base font-bold text-slate-900">Assigned To Me</h2>
+                <h2 className="text-base font-bold text-slate-900 tracking-tight">Assigned To Me</h2>
                 <p className="text-xs text-slate-500">Active tasks requiring your technical review or submission</p>
               </div>
               <button
                 type="button"
                 onClick={() => onNavigate('Tasks')}
-                className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 flex items-center gap-1"
+                className="text-xs font-semibold text-slate-700 hover:text-slate-900 flex items-center gap-1 px-2.5 py-1 rounded-md hover:bg-slate-50 transition-colors"
               >
                 Go to Tasks <ChevronRight className="w-3.5 h-3.5" />
               </button>
@@ -379,21 +437,21 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                   <div
                     key={t.id}
                     onClick={() => onNavigate('Tasks')}
-                    className="p-3.5 rounded-lg border border-slate-100 hover:border-slate-200 bg-white transition-all cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                    className="p-3.5 rounded-xl border border-slate-100 hover:border-slate-200 bg-white hover:bg-slate-50/50 transition-all cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs"
                   >
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <StatusBadge status={t.status} size="sm" />
                         <StatusBadge status={t.priority} size="sm" />
                         <span className="text-xs text-slate-400">·</span>
-                        <span className="text-xs text-slate-500">Due {t.deadline}</span>
+                        <span className="text-xs text-slate-500 font-mono">Due {t.deadline}</span>
                       </div>
                       <p className="text-sm font-semibold text-slate-900 truncate">
                         {t.title}
                       </p>
                     </div>
                     <div className="text-xs text-slate-500 shrink-0">
-                      Assigned by <strong className="text-slate-700 font-medium">{t.assignedBy}</strong>
+                      Assigned by <strong className="text-slate-800 font-medium">{t.assignedBy}</strong>
                     </div>
                   </div>
                 ))
@@ -405,46 +463,48 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
         {/* Right Sidebar: Recent Activity & Latest Announcements */}
         <div className="space-y-6">
           {/* Latest Announcements */}
-          <div className="bg-white rounded-xl border border-slate-200/90 p-5 shadow-2xs">
+          <div className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-bold text-slate-900">Announcements</h2>
+              <h2 className="text-base font-bold text-slate-900 tracking-tight">Announcements</h2>
               <button
                 type="button"
                 onClick={() => onNavigate('Announcements')}
-                className="text-xs font-semibold text-indigo-600 hover:text-indigo-700"
+                className="text-xs font-semibold text-slate-600 hover:text-slate-900"
               >
                 View board
               </button>
             </div>
 
-            <div className="space-y-3.5">
+            <div className="space-y-3">
               {announcements.slice(0, 3).map((a) => (
                 <div
                   key={a.id}
                   onClick={() => onNavigate('Announcements')}
-                  className="p-3 rounded-lg bg-slate-50/70 border border-slate-100 hover:border-slate-200 transition-colors cursor-pointer"
+                  className="p-3.5 rounded-xl bg-slate-50/70 border border-slate-100 hover:border-slate-200 transition-colors cursor-pointer group"
                 >
-                  <div className="flex items-center justify-between gap-2 mb-1">
-                    <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-sm ${
-                      a.priority === 'Urgent' ? 'bg-rose-100 text-rose-700' : 'bg-slate-200 text-slate-700'
+                  <div className="flex items-center justify-between gap-2 mb-1.5">
+                    <span className={`text-[10px] font-semibold font-mono px-1.5 py-0.5 rounded ${
+                      a.priority === 'Urgent'
+                        ? 'bg-rose-100 text-rose-700 border border-rose-200'
+                        : 'bg-slate-200 text-slate-700'
                     }`}>
                       {a.priority}
                     </span>
-                    <span className="text-[11px] text-slate-400">{a.date}</span>
+                    <span className="text-[11px] text-slate-400 font-mono">{a.date}</span>
                   </div>
-                  <h3 className="text-xs font-bold text-slate-900 line-clamp-1">
+                  <h3 className="text-xs font-bold text-slate-900 line-clamp-1 group-hover:text-indigo-600 transition-colors">
                     {a.title}
                   </h3>
                   <p className="text-xs text-slate-600 mt-1 line-clamp-2 leading-relaxed">
                     {a.content}
                   </p>
-                  <div className="mt-2 text-[11px] text-slate-500 flex items-center gap-1.5">
+                  <div className="mt-2.5 pt-2 border-t border-slate-200/60 text-[11px] text-slate-500 flex items-center gap-1.5">
                     <Avatar
                       src={a.authorAvatar}
                       name={a.postedBy}
                       size="xs"
                     />
-                    <span>{a.postedBy}</span>
+                    <span className="font-medium text-slate-700">{a.postedBy}</span>
                   </div>
                 </div>
               ))}
@@ -452,35 +512,38 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           </div>
 
           {/* Recent Club Activity Feed */}
-          <div className="bg-white rounded-xl border border-slate-200/90 p-5 shadow-2xs">
-            <h2 className="text-base font-bold text-slate-900 mb-4">Recent Activity</h2>
-            <div className="relative pl-6 space-y-4 before:content-[''] before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-px before:bg-slate-200">
+          <div className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-base font-bold text-slate-900 tracking-tight">Recent Activity</h2>
+              <span className="text-[11px] font-mono text-slate-400">Live feed</span>
+            </div>
+            <div className="relative pl-5 space-y-4 before:content-[''] before:absolute before:left-2 before:top-2 before:bottom-2 before:w-px before:bg-slate-200">
               <div className="relative">
-                <div className="absolute -left-6 top-1 w-2.5 h-2.5 rounded-full bg-indigo-600 ring-4 ring-white" />
+                <div className="absolute -left-5 top-1 w-2 h-2 rounded-full bg-indigo-600 ring-4 ring-white" />
                 <p className="text-xs text-slate-800 font-semibold">HackNova Registration Portal</p>
                 <p className="text-[11px] text-slate-500 mt-0.5">Dishank logged 4.5 hours of frontend integration.</p>
-                <span className="text-[10px] text-slate-400">2 hours ago</span>
+                <span className="text-[10px] text-slate-400 font-mono">2 hours ago</span>
               </div>
 
               <div className="relative">
-                <div className="absolute -left-6 top-1 w-2.5 h-2.5 rounded-full bg-emerald-600 ring-4 ring-white" />
+                <div className="absolute -left-5 top-1 w-2 h-2 rounded-full bg-emerald-600 ring-4 ring-white" />
                 <p className="text-xs text-slate-800 font-semibold">Venue Sanction Approved</p>
                 <p className="text-[11px] text-slate-500 mt-0.5">Sophia secured Dean approval for Central Atrium.</p>
-                <span className="text-[10px] text-slate-400">5 hours ago</span>
+                <span className="text-[10px] text-slate-400 font-mono">5 hours ago</span>
               </div>
 
               <div className="relative">
-                <div className="absolute -left-6 top-1 w-2.5 h-2.5 rounded-full bg-blue-600 ring-4 ring-white" />
+                <div className="absolute -left-5 top-1 w-2 h-2 rounded-full bg-blue-600 ring-4 ring-white" />
                 <p className="text-xs text-slate-800 font-semibold">Autonomous Rover Demo</p>
-                <p className="text-[11px] text-slate-500 mt-0.5">Aryan & Hardware team marked attendance for 85 members.</p>
-                <span className="text-[10px] text-slate-400">Yesterday</span>
+                <p className="text-[11px] text-slate-500 mt-0.5">Aryan marked attendance for 85 attendees.</p>
+                <span className="text-[10px] text-slate-400 font-mono">Yesterday</span>
               </div>
 
               <div className="relative">
-                <div className="absolute -left-6 top-1 w-2.5 h-2.5 rounded-full bg-purple-600 ring-4 ring-white" />
+                <div className="absolute -left-5 top-1 w-2 h-2 rounded-full bg-purple-600 ring-4 ring-white" />
                 <p className="text-xs text-slate-800 font-semibold">New Asset Kit Published</p>
                 <p className="text-[11px] text-slate-500 mt-0.5">Mira added 3D isometric vectors to Design drive.</p>
-                <span className="text-[10px] text-slate-400">2 days ago</span>
+                <span className="text-[10px] text-slate-400 font-mono">2 days ago</span>
               </div>
             </div>
           </div>
