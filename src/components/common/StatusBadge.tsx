@@ -12,6 +12,7 @@ interface StatusBadgeProps {
     | 'Probation'
     | 'Present'
     | 'Absent'
+    | 'Late'
     | 'Excused'
     | 'Verified'
     | 'Pending Verification'
@@ -106,6 +107,11 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, size = 'md' })
         };
 
       // Attendance & Verification
+      case 'Late':
+        return {
+          container: 'bg-amber-50 text-amber-700 border-amber-200/80 font-medium',
+          dot: 'bg-amber-500',
+        };
       case 'Excused':
       case 'Pending Verification':
         return {

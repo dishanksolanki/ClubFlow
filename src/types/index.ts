@@ -101,26 +101,54 @@ export interface ClubEvent {
   relatedTaskIds?: string[];
 }
 
+export type AttendanceStatus = 'Present' | 'Absent' | 'Late' | 'Excused';
+
 export interface AttendanceRecord {
   id: string;
   eventName: string;
+  eventId?: string;
   date: string;
-  type: 'General Meeting' | 'Workshop' | 'Core Standup' | 'Event Prep' | 'Hackathon';
-  status: 'Present' | 'Absent' | 'Excused';
-  verifiedBy: string;
-  durationHours: number;
+  member: string; // Member name e.g. "Dishank Solanki"
+  memberAvatar?: string;
+  department: DepartmentType;
+  checkInTime: string; // e.g. "09:05 AM" or "—"
+  status: AttendanceStatus;
+  recordedBy: string; // e.g. "Sophia Vance" or "Faculty Advisor"
+  verifiedBy?: string; // backwards compatibility
+  type?: 'General Meeting' | 'Workshop' | 'Core Standup' | 'Event Prep' | 'Hackathon';
+  durationHours?: number;
   notes?: string;
 }
 
 export interface WorkingHourRecord {
   id: string;
   date: string;
-  project: string;
+  member: string; // Member name e.g. "Dishank Solanki"
+  department: DepartmentType;
+  project: string; // Activity or task name
+  startTime?: string; // e.g. "02:00 PM"
+  endTime?: string; // e.g. "05:30 PM"
   description: string;
   hours: number;
-  department: DepartmentType;
   verifiedBy: string;
   status: 'Verified' | 'Pending Verification';
+}
+
+export interface ActivityItem {
+  id: string;
+  member: string;
+  memberAvatar?: string;
+  action:
+    | 'Task assigned'
+    | 'Task submitted'
+    | 'Task completed'
+    | 'Event created'
+    | 'Attendance marked'
+    | 'Work record added'
+    | string;
+  timestamp: string; // e.g. "Just now", "2 hours ago"
+  relatedItem: string; // e.g. "HackNova 2026 Registration Portal"
+  category?: 'task' | 'event' | 'attendance' | 'hours';
 }
 
 export interface Announcement {

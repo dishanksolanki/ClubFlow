@@ -13,7 +13,7 @@ import {
   Activity,
   Layers,
 } from 'lucide-react';
-import { Member, Task, ClubEvent, WorkingHourRecord, Announcement } from '../types';
+import { Member, Task, ClubEvent, WorkingHourRecord, Announcement, AttendanceRecord, ActivityItem } from '../types';
 import { Avatar } from '../components/common/Avatar';
 import { StatusBadge } from '../components/common/StatusBadge';
 import { NavTab } from '../components/layout/Sidebar';
@@ -23,6 +23,8 @@ interface DashboardPageProps {
   tasks: Task[];
   events: ClubEvent[];
   workingHours: WorkingHourRecord[];
+  attendanceRecords: AttendanceRecord[];
+  activities?: ActivityItem[];
   announcements: Announcement[];
   onNavigate: (tab: NavTab) => void;
   onOpenCreateTask: () => void;
@@ -37,6 +39,9 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
   currentUser,
   tasks,
   events,
+  workingHours,
+  attendanceRecords,
+  activities = [],
   announcements,
   onNavigate,
   onOpenCreateTask,
@@ -60,6 +65,17 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
     .slice(0, 4);
 
   const myTasks = tasks.filter((t) => t.assignedTo === currentUser.name || t.assignedTo.includes('Dishank'));
+
+  // Real Attendance statistics
+  const presentAttendanceRecords = attendanceRecords.filter((r) => r.status === 'Present' || r.status === 'Late');
+  const totalAttendanceRecords = attendanceRecords.length;
+  const overallAttendanceRate =
+    totalAttendanceRecords > 0
+      ? Math.round((presentAttendanceRecords.length / totalAttendanceRecords) * 100)
+      : currentUser.attendanceRate;
+
+  // Real Working Hours statistics
+  const totalLoggedWorkingHours = workingHours.reduce((acc, r) => acc + r.hours, 0);
 
   // Department distribution calculation
   const deptBreakdown = [
@@ -187,9 +203,11 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           </div>
           <div className="flex items-baseline gap-2">
             <span className="text-2xl font-bold font-mono tabular-nums text-slate-900">
-              87%
+              {overallAttendanceRate}%
             </span>
-            <span className="text-xs text-emerald-600 font-semibold font-mono">14 / 16 sessions</span>
+            <span className="text-xs text-emerald-600 font-semibold font-mono">
+              {presentAttendanceRecords.length} / {totalAttendanceRecords} records
+            </span>
           </div>
           <div className="mt-3 flex items-center justify-between text-[11px] text-slate-400 pt-3 border-t border-slate-100">
             <span>Minimum required: 75%</span>
@@ -264,12 +282,12 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           </div>
           <div className="flex items-baseline gap-2">
             <span className="text-2xl font-bold font-mono tabular-nums text-slate-900">
-              32h
+              {totalLoggedWorkingHours.toFixed(1)}h
             </span>
             <span className="text-xs text-blue-600 font-semibold font-mono">Goal: 40h/term</span>
           </div>
           <div className="mt-3 flex items-center justify-between text-[11px] text-slate-400 pt-3 border-t border-slate-100">
-            <span>80% target attained</span>
+            <span>{Math.min(100, Math.round((totalLoggedWorkingHours / 40) * 100))}% target attained</span>
             <span className="group-hover:text-indigo-600 font-medium flex items-center gap-0.5 transition-colors">
               Log Details <ArrowUpRight className="w-3 h-3" />
             </span>
@@ -514,37 +532,67 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           {/* Recent Club Activity Feed */}
           <div className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-bold text-slate-900 tracking-tight">Recent Activity</h2>
-              <span className="text-[11px] font-mono text-slate-400">Live feed</span>
+              <div className="flex items-center gap-2">
+                <Activity className="w-4 h-4 text-indigo-600" />
+                <h2 className="text-base font-bold text-slate-900 tracking-tight">Recent Activity</h2>
+              </div>
+              <span className="text-[11px] font-mono text-slate-400">Live club log</span>
             </div>
-            <div className="relative pl-5 space-y-4 before:content-[''] before:absolute before:left-2 before:top-2 before:bottom-2 before:w-px before:bg-slate-200">
-              <div className="relative">
-                <div className="absolute -left-5 top-1 w-2 h-2 rounded-full bg-indigo-600 ring-4 ring-white" />
-                <p className="text-xs text-slate-800 font-semibold">HackNova Registration Portal</p>
-                <p className="text-[11px] text-slate-500 mt-0.5">Dishank logged 4.5 hours of frontend integration.</p>
-                <span className="text-[10px] text-slate-400 font-mono">2 hours ago</span>
-              </div>
+            <div className="relative pl-5 space-y-4 before:content-[''] before:absolute before:left-2 before:top-2 before:bottom-2 before:w-px before:bg-slate-200 max-h-96 overflow-y-auto pr-1">
+              {activities.length > 0 ? (
+                activities.slice(0, 10).map((act) => {
+                  let badgeStyle = 'bg-slate-100 text-slate-700 border-slate-200';
+                  let dotColor = 'bg-slate-900';
 
-              <div className="relative">
-                <div className="absolute -left-5 top-1 w-2 h-2 rounded-full bg-emerald-600 ring-4 ring-white" />
-                <p className="text-xs text-slate-800 font-semibold">Venue Sanction Approved</p>
-                <p className="text-[11px] text-slate-500 mt-0.5">Sophia secured Dean approval for Central Atrium.</p>
-                <span className="text-[10px] text-slate-400 font-mono">5 hours ago</span>
-              </div>
+                  if (act.action === 'Task completed') {
+                    badgeStyle = 'bg-emerald-50 text-emerald-700 border-emerald-200';
+                    dotColor = 'bg-emerald-600';
+                  } else if (act.action === 'Task submitted') {
+                    badgeStyle = 'bg-amber-50 text-amber-700 border-amber-200';
+                    dotColor = 'bg-amber-600';
+                  } else if (act.action === 'Task assigned') {
+                    badgeStyle = 'bg-indigo-50 text-indigo-700 border-indigo-200';
+                    dotColor = 'bg-indigo-600';
+                  } else if (act.action === 'Event created') {
+                    badgeStyle = 'bg-purple-50 text-purple-700 border-purple-200';
+                    dotColor = 'bg-purple-600';
+                  } else if (act.action === 'Attendance marked') {
+                    badgeStyle = 'bg-teal-50 text-teal-700 border-teal-200';
+                    dotColor = 'bg-teal-600';
+                  } else if (act.action === 'Work record added' || act.action.includes('Work')) {
+                    badgeStyle = 'bg-blue-50 text-blue-700 border-blue-200';
+                    dotColor = 'bg-blue-600';
+                  }
 
-              <div className="relative">
-                <div className="absolute -left-5 top-1 w-2 h-2 rounded-full bg-blue-600 ring-4 ring-white" />
-                <p className="text-xs text-slate-800 font-semibold">Autonomous Rover Demo</p>
-                <p className="text-[11px] text-slate-500 mt-0.5">Aryan marked attendance for 85 attendees.</p>
-                <span className="text-[10px] text-slate-400 font-mono">Yesterday</span>
-              </div>
-
-              <div className="relative">
-                <div className="absolute -left-5 top-1 w-2 h-2 rounded-full bg-purple-600 ring-4 ring-white" />
-                <p className="text-xs text-slate-800 font-semibold">New Asset Kit Published</p>
-                <p className="text-[11px] text-slate-500 mt-0.5">Mira added 3D isometric vectors to Design drive.</p>
-                <span className="text-[10px] text-slate-400 font-mono">2 days ago</span>
-              </div>
+                  return (
+                    <div key={act.id} className="relative">
+                      <div className={`absolute -left-5 top-1.5 w-2 h-2 rounded-full ${dotColor} ring-4 ring-white`} />
+                      <div className="flex items-center justify-between gap-2 flex-wrap mb-1">
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded border uppercase font-mono tracking-wider ${badgeStyle}`}>
+                          {act.action}
+                        </span>
+                        <span className="text-[10px] text-slate-400 font-mono whitespace-nowrap">{act.timestamp}</span>
+                      </div>
+                      <p className="text-xs text-slate-800 leading-snug">
+                        <strong className="text-slate-900 font-bold">{act.member}</strong>
+                        <span className="text-slate-500"> · {act.relatedItem}</span>
+                      </p>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="relative">
+                  <div className="absolute -left-5 top-1.5 w-2 h-2 rounded-full bg-indigo-600 ring-4 ring-white" />
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded border bg-blue-50 text-blue-700 border-blue-200 uppercase font-mono">
+                    Work record added
+                  </span>
+                  <p className="text-xs text-slate-800 mt-1">
+                    <strong className="text-slate-900 font-bold">Dishank Solanki</strong>
+                    <span className="text-slate-500"> · HackNova 2026 Registration Portal (4.5h)</span>
+                  </p>
+                  <span className="text-[10px] text-slate-400 font-mono mt-0.5 block">2 hours ago</span>
+                </div>
+              )}
             </div>
           </div>
         </div>

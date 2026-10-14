@@ -35,6 +35,7 @@ import {
   WORKING_HOURS_LOG,
   ANNOUNCEMENTS,
   NOTIFICATIONS,
+  INITIAL_ACTIVITIES,
 } from './data/mockData';
 
 import {
@@ -43,9 +44,12 @@ import {
   Task,
   TaskStatus,
   ClubEvent,
+  AttendanceRecord,
+  AttendanceStatus,
   WorkingHourRecord,
   Announcement,
   ClubNotification,
+  ActivityItem,
 } from './types';
 
 export default function App() {
@@ -59,6 +63,8 @@ export default function App() {
   const [tasks, setTasks] = useState<Task[]>(TASKS);
   const [events, setEvents] = useState<ClubEvent[]>(EVENTS);
   const [workingHours, setWorkingHours] = useState<WorkingHourRecord[]>(WORKING_HOURS_LOG);
+  const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>(ATTENDANCE_HISTORY);
+  const [activities, setActivities] = useState<ActivityItem[]>(INITIAL_ACTIVITIES);
   const [announcements, setAnnouncements] = useState<Announcement[]>(ANNOUNCEMENTS);
   const [notifications, setNotifications] = useState<ClubNotification[]>(NOTIFICATIONS);
 
@@ -80,11 +86,29 @@ export default function App() {
     'Content',
   ];
 
+  // Helper to record an activity
+  const recordActivity = (action: string, member: string, relatedItem: string, category: 'task' | 'event' | 'attendance' | 'hours') => {
+    const newAct: ActivityItem = {
+      id: `act-${Date.now()}`,
+      action,
+      member,
+      relatedItem,
+      timestamp: 'Just now',
+      category,
+    };
+    setActivities((prev) => [newAct, ...prev]);
+  };
+
   // Actions
   const handleUpdateTask = (updatedTask: Task) => {
     setTasks((prev) =>
       prev.map((t) => (t.id === updatedTask.id ? updatedTask : t))
     );
+    if (updatedTask.status === 'Submitted') {
+      recordActivity('Task submitted', currentUser.name, updatedTask.title, 'task');
+    } else if (updatedTask.status === 'Completed' || updatedTask.status === 'Approved') {
+      recordActivity('Task completed', currentUser.name, updatedTask.title, 'task');
+    }
   };
 
   const handleUpdateTaskStatus = (taskId: string, newStatus: TaskStatus) => {
@@ -97,6 +121,11 @@ export default function App() {
             actor: currentUser.name,
             timestamp: 'Just now',
           };
+          if (newStatus === 'Submitted') {
+            recordActivity('Task submitted', currentUser.name, t.title, 'task');
+          } else if (newStatus === 'Completed' || newStatus === 'Approved') {
+            recordActivity('Task completed', currentUser.name, t.title, 'task');
+          }
           return {
             ...t,
             status: newStatus,
@@ -110,6 +139,7 @@ export default function App() {
 
   const handleAddTask = (newTask: Task) => {
     setTasks((prev) => [newTask, ...prev]);
+    recordActivity('Task assigned', currentUser.name, `${newTask.title} → ${newTask.assignedTo}`, 'task');
     // Also push a notification
     const notif: ClubNotification = {
       id: `notif-${Date.now()}`,
@@ -125,11 +155,57 @@ export default function App() {
 
   const handleLogHours = (record: WorkingHourRecord) => {
     setWorkingHours((prev) => [record, ...prev]);
-    // update current user hours
-    setCurrentUser((prev) => ({
-      ...prev,
-      workingHours: prev.workingHours + record.hours,
-    }));
+    recordActivity('Work record added', record.member, `${record.project} (${record.hours}h)`, 'hours');
+    // update member working hours in members list
+    setMembers((prev) =>
+      prev.map((m) => {
+        if (m.name.toLowerCase() === record.member.toLowerCase()) {
+          return {
+            ...m,
+            workingHours: parseFloat((m.workingHours + record.hours).toFixed(1)),
+          };
+        }
+        return m;
+      })
+    );
+    // update current user if matching
+    if (record.member.toLowerCase() === currentUser.name.toLowerCase()) {
+      setCurrentUser((prev) => ({
+        ...prev,
+        workingHours: parseFloat((prev.workingHours + record.hours).toFixed(1)),
+      }));
+    }
+  };
+
+  const handleUpdateWorkingHourStatus = (recordId: string, status: 'Verified' | 'Pending Verification') => {
+    setWorkingHours((prev) =>
+      prev.map((r) => {
+        if (r.id === recordId) {
+          if (status === 'Verified') {
+            recordActivity('Work record added', currentUser.name, `Verified ${r.member}'s ${r.hours}h for ${r.project}`, 'hours');
+          }
+          return { ...r, status, verifiedBy: currentUser.name };
+        }
+        return r;
+      })
+    );
+  };
+
+  const handleUpdateAttendanceStatus = (recordId: string, newStatus: AttendanceStatus) => {
+    setAttendanceRecords((prev) =>
+      prev.map((r) => {
+        if (r.id === recordId) {
+          recordActivity('Attendance marked', currentUser.name, `${r.member} marked ${newStatus} for ${r.eventName}`, 'attendance');
+          return { ...r, status: newStatus };
+        }
+        return r;
+      })
+    );
+  };
+
+  const handleAddAttendanceRecord = (newRecord: AttendanceRecord) => {
+    setAttendanceRecords((prev) => [newRecord, ...prev]);
+    recordActivity('Attendance marked', currentUser.name, `${newRecord.member} marked ${newRecord.status} for ${newRecord.eventName}`, 'attendance');
   };
 
   const handleAddAnnouncement = (newAnnouncement: Announcement) => {
@@ -148,6 +224,7 @@ export default function App() {
 
   const handleAddEvent = (newEvent: ClubEvent) => {
     setEvents((prev) => [newEvent, ...prev]);
+    recordActivity('Event created', currentUser.name, newEvent.title, 'event');
     const notif: ClubNotification = {
       id: `notif-${Date.now()}`,
       title: 'New Event Scheduled',
@@ -254,6 +331,8 @@ export default function App() {
               tasks={tasks}
               events={events}
               workingHours={workingHours}
+              attendanceRecords={attendanceRecords}
+              activities={activities}
               announcements={announcements}
               onNavigate={setActiveTab}
               onOpenCreateTask={() => setIsCreateTaskOpen(true)}
@@ -300,16 +379,24 @@ export default function App() {
 
           {activeTab === 'Attendance' && (
             <AttendancePage
-              records={ATTENDANCE_HISTORY}
+              records={attendanceRecords}
+              members={members}
+              events={events}
               currentUser={currentUser}
+              onUpdateAttendanceStatus={handleUpdateAttendanceStatus}
+              onAddAttendanceRecord={handleAddAttendanceRecord}
+              onSelectMember={(m) => setSelectedMember(m)}
             />
           )}
 
           {activeTab === 'Working Hours' && (
             <WorkingHoursPage
               records={workingHours}
+              members={members}
               currentUser={currentUser}
               onOpenLogHours={() => setIsLogHoursOpen(true)}
+              onSelectMember={(m) => setSelectedMember(m)}
+              onUpdateRecordStatus={handleUpdateWorkingHourStatus}
             />
           )}
 
@@ -377,6 +464,7 @@ export default function App() {
         onLogHours={handleLogHours}
         currentUser={currentUser}
         departments={departmentsList}
+        members={members}
       />
 
       <CreateAnnouncementModal
@@ -400,6 +488,9 @@ export default function App() {
         member={selectedMember}
         onClose={() => setSelectedMember(null)}
         tasks={tasks}
+        attendanceRecords={attendanceRecords}
+        workingHours={workingHours}
+        events={events}
         onSelectTask={(task) => {
           setSelectedMember(null);
           setSelectedTaskForDetail(task);
@@ -424,7 +515,10 @@ export default function App() {
         members={members}
         tasks={tasks}
         currentUser={currentUser}
+        attendanceRecords={attendanceRecords}
         onUpdateEvent={handleUpdateEvent}
+        onUpdateAttendanceStatus={handleUpdateAttendanceStatus}
+        onAddAttendanceRecord={handleAddAttendanceRecord}
         onSelectTask={(task) => {
           setSelectedEventForDetail(null);
           setSelectedTaskForDetail(task);
