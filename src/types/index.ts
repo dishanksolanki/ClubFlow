@@ -154,12 +154,15 @@ export interface ActivityItem {
 export interface Announcement {
   id: string;
   title: string;
-  content: string;
+  content: string; // Message content
+  message?: string; // alias for message
   postedBy: string;
   authorRole: string;
   authorAvatar?: string;
   department: DepartmentType | 'General';
-  date: string;
+  audience?: 'All Members' | 'Specific Department';
+  targetDepartment?: DepartmentType;
+  date: string; // e.g. "Oct 14, 2026 at 09:30 AM" or "Today, 09:30 AM"
   priority: 'Normal' | 'Important' | 'Urgent';
   pinned?: boolean;
 }
@@ -186,4 +189,5 @@ export interface ClubNotification {
   read: boolean;
   type: 'task' | 'event' | 'announcement' | 'attendance';
   linkTab?: string;
+  itemId?: string; // e.g. ID of task, event, or announcement to trigger detail modal
 }

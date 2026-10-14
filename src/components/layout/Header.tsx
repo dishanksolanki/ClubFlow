@@ -23,6 +23,7 @@ interface HeaderProps {
   notifications: ClubNotification[];
   onMarkNotificationAsRead: (id: string) => void;
   onClearAllNotifications: () => void;
+  onNotificationClick?: (notification: ClubNotification) => void;
   onGlobalSearchSelect: (type: 'event' | 'task' | 'member' | 'announcement', id: string) => void;
   searchQuery: string;
   onSearchQueryChange: (query: string) => void;
@@ -36,12 +37,14 @@ export const Header: React.FC<HeaderProps> = ({
   notifications,
   onMarkNotificationAsRead,
   onClearAllNotifications,
+  onNotificationClick,
   searchQuery,
   onSearchQueryChange,
 }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showClubDropdown, setShowClubDropdown] = useState(false);
   const [selectedClub, setSelectedClub] = useState('ACM Student Chapter');
+  const [notifFilter, setNotifFilter] = useState<'all' | 'unread'>('all');
 
   const notifRef = useRef<HTMLDivElement>(null);
   const clubRef = useRef<HTMLDivElement>(null);
@@ -172,11 +175,13 @@ export const Header: React.FC<HeaderProps> = ({
             type="button"
             onClick={() => setShowNotifications(!showNotifications)}
             aria-label="View notifications"
-            className="relative p-2 text-slate-500 hover:text-slate-900 hover:bg-slate-100/80 rounded-lg transition-colors border border-transparent hover:border-slate-200/60"
+            className="relative p-2 text-slate-500 hover:text-slate-900 hover:bg-slate-100/80 rounded-lg transition-colors border border-transparent hover:border-slate-200/60 cursor-pointer"
           >
             <Bell className="w-4 h-4" />
             {unreadCount > 0 && (
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-indigo-600 ring-2 ring-white" />
+              <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-indigo-600 text-[10px] font-bold text-white ring-2 ring-white font-mono shadow-xs">
+                {unreadCount}
+              </span>
             )}
           </button>
 
@@ -195,40 +200,74 @@ export const Header: React.FC<HeaderProps> = ({
                   <button
                     type="button"
                     onClick={onClearAllNotifications}
-                    className="text-[11px] text-indigo-600 hover:text-indigo-800 font-semibold"
+                    className="text-[11px] text-indigo-600 hover:text-indigo-800 font-semibold cursor-pointer"
                   >
                     Mark all read
                   </button>
                 )}
               </div>
 
+              {/* Filter Tabs: All vs Unread */}
+              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 border-b border-slate-100 text-xs">
+                <button
+                  type="button"
+                  onClick={() => setNotifFilter('all')}
+                  className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors cursor-pointer ${
+                    notifFilter === 'all'
+                      ? 'bg-white text-slate-900 shadow-2xs font-semibold border border-slate-200/60'
+                      : 'text-slate-500 hover:text-slate-800'
+                  }`}
+                >
+                  All ({notifications.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setNotifFilter('unread')}
+                  className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors cursor-pointer ${
+                    notifFilter === 'unread'
+                      ? 'bg-white text-indigo-600 shadow-2xs font-semibold border border-indigo-100'
+                      : 'text-slate-500 hover:text-slate-800'
+                  }`}
+                >
+                  Unread ({unreadCount})
+                </button>
+              </div>
+
               <div className="max-h-80 overflow-y-auto divide-y divide-slate-100">
                 {notifications.length === 0 ? (
                   <div className="py-8 text-center text-xs text-slate-400">
-                    No new notifications right now
+                    No notifications right now
+                  </div>
+                ) : notifFilter === 'unread' && notifications.filter((n) => !n.read).length === 0 ? (
+                  <div className="py-8 text-center text-xs text-slate-400">
+                    No unread notifications
                   </div>
                 ) : (
-                  notifications.map((notif) => (
+                  (notifFilter === 'unread' ? notifications.filter((n) => !n.read) : notifications).map((notif) => (
                     <div
                       key={notif.id}
                       onClick={() => {
                         onMarkNotificationAsRead(notif.id);
-                        if (notif.linkTab) onTabChange(notif.linkTab as NavTab);
+                        if (onNotificationClick) {
+                          onNotificationClick(notif);
+                        } else if (notif.linkTab) {
+                          onTabChange(notif.linkTab as NavTab);
+                        }
                         setShowNotifications(false);
                       }}
-                      className={`p-3.5 hover:bg-slate-50 cursor-pointer transition-colors flex gap-3 text-left ${
+                      className={`p-3.5 hover:bg-slate-50 cursor-pointer transition-colors flex items-start gap-3 text-left group ${
                         !notif.read ? 'bg-indigo-50/30' : ''
                       }`}
                     >
-                      <div className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center shrink-0 mt-0.5">
+                      <div className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center shrink-0 mt-0.5 shadow-2xs">
                         {getNotifIcon(notif.type)}
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center justify-between gap-1">
-                          <p className="text-xs font-semibold text-slate-900 truncate">
+                          <p className={`text-xs truncate ${!notif.read ? 'font-bold text-slate-900' : 'font-medium text-slate-700'}`}>
                             {notif.title}
                           </p>
-                          <span className="text-[10px] text-slate-400 whitespace-nowrap font-mono">
+                          <span className="text-[10px] text-slate-400 whitespace-nowrap font-mono shrink-0">
                             {notif.timestamp}
                           </span>
                         </div>
@@ -236,6 +275,19 @@ export const Header: React.FC<HeaderProps> = ({
                           {notif.message}
                         </p>
                       </div>
+                      {!notif.read && (
+                        <button
+                          type="button"
+                          title="Mark as read"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onMarkNotificationAsRead(notif.id);
+                          }}
+                          className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-indigo-600 hover:bg-white rounded transition-all shrink-0 cursor-pointer"
+                        >
+                          <Check className="w-3.5 h-3.5" />
+                        </button>
+                      )}
                     </div>
                   ))
                 )}

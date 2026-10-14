@@ -23,6 +23,7 @@ import { CreateEventModal } from './components/modals/CreateEventModal';
 import { MemberDetailModal } from './components/modals/MemberDetailModal';
 import { TaskDetailModal } from './components/modals/TaskDetailModal';
 import { EventDetailModal } from './components/modals/EventDetailModal';
+import { AnnouncementDetailModal } from './components/modals/AnnouncementDetailModal';
 
 // Mock Data
 import {
@@ -76,6 +77,7 @@ export default function App() {
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
   const [selectedTaskForDetail, setSelectedTaskForDetail] = useState<Task | null>(null);
   const [selectedEventForDetail, setSelectedEventForDetail] = useState<ClubEvent | null>(null);
+  const [selectedAnnouncementForDetail, setSelectedAnnouncementForDetail] = useState<Announcement | null>(null);
 
   const departmentsList: DepartmentType[] = [
     'Technical',
@@ -126,6 +128,34 @@ export default function App() {
           } else if (newStatus === 'Completed' || newStatus === 'Approved') {
             recordActivity('Task completed', currentUser.name, t.title, 'task');
           }
+
+          // Push notifications for task approvals/rejections
+          if (newStatus === 'Approved') {
+            const notif: ClubNotification = {
+              id: `notif-${Date.now()}`,
+              title: 'Task Approved',
+              message: `Dr. Evelyn Hayes approved "${t.title}".`,
+              timestamp: 'Just now',
+              read: false,
+              type: 'task',
+              linkTab: 'Tasks',
+              itemId: t.id,
+            };
+            setNotifications((prevNotifs) => [notif, ...prevNotifs]);
+          } else if (newStatus === 'Rejected') {
+            const notif: ClubNotification = {
+              id: `notif-${Date.now()}`,
+              title: 'Task Needs Revision',
+              message: `"${t.title}" was marked as needing changes.`,
+              timestamp: 'Just now',
+              read: false,
+              type: 'task',
+              linkTab: 'Tasks',
+              itemId: t.id,
+            };
+            setNotifications((prevNotifs) => [notif, ...prevNotifs]);
+          }
+
           return {
             ...t,
             status: newStatus,
@@ -143,12 +173,13 @@ export default function App() {
     // Also push a notification
     const notif: ClubNotification = {
       id: `notif-${Date.now()}`,
-      title: 'New Task Created',
+      title: 'Task Assigned',
       message: `"${newTask.title}" assigned to ${newTask.assignedTo}.`,
       timestamp: 'Just now',
       read: false,
       type: 'task',
       linkTab: 'Tasks',
+      itemId: newTask.id,
     };
     setNotifications((prev) => [notif, ...prev]);
   };
@@ -210,16 +241,36 @@ export default function App() {
 
   const handleAddAnnouncement = (newAnnouncement: Announcement) => {
     setAnnouncements((prev) => [newAnnouncement, ...prev]);
+    recordActivity('Announcement posted', currentUser.name, newAnnouncement.title, 'event');
     const notif: ClubNotification = {
       id: `notif-${Date.now()}`,
       title: 'New Announcement',
-      message: `"${newAnnouncement.title}" posted by ${newAnnouncement.postedBy}.`,
+      message: `${newAnnouncement.postedBy} posted "${newAnnouncement.title}"`,
       timestamp: 'Just now',
       read: false,
       type: 'announcement',
       linkTab: 'Announcements',
+      itemId: newAnnouncement.id,
     };
     setNotifications((prev) => [notif, ...prev]);
+  };
+
+  const handleNotificationClick = (notif: ClubNotification) => {
+    if (notif.linkTab) {
+      setActiveTab(notif.linkTab as NavTab);
+    }
+    if (notif.itemId) {
+      if (notif.type === 'task') {
+        const found = tasks.find((t) => t.id === notif.itemId);
+        if (found) setSelectedTaskForDetail(found);
+      } else if (notif.type === 'event') {
+        const found = events.find((e) => e.id === notif.itemId);
+        if (found) setSelectedEventForDetail(found);
+      } else if (notif.type === 'announcement') {
+        const found = announcements.find((a) => a.id === notif.itemId);
+        if (found) setSelectedAnnouncementForDetail(found);
+      }
+    }
   };
 
   const handleAddEvent = (newEvent: ClubEvent) => {
@@ -227,12 +278,13 @@ export default function App() {
     recordActivity('Event created', currentUser.name, newEvent.title, 'event');
     const notif: ClubNotification = {
       id: `notif-${Date.now()}`,
-      title: 'New Event Scheduled',
+      title: 'Upcoming Event',
       message: `"${newEvent.title}" on ${newEvent.date} at ${newEvent.venue}.`,
       timestamp: 'Just now',
       read: false,
       type: 'event',
       linkTab: 'Events',
+      itemId: newEvent.id,
     };
     setNotifications((prev) => [notif, ...prev]);
   };
@@ -307,6 +359,7 @@ export default function App() {
           notifications={notifications}
           onMarkNotificationAsRead={handleMarkNotificationAsRead}
           onClearAllNotifications={handleClearAllNotifications}
+          onNotificationClick={handleNotificationClick}
           onGlobalSearchSelect={(type, id) => {
             if (type === 'event') {
               const found = events.find((e) => e.id === id);
@@ -317,6 +370,9 @@ export default function App() {
             } else if (type === 'member') {
               const found = members.find((m) => m.id === id);
               if (found) setSelectedMember(found);
+            } else if (type === 'announcement') {
+              const found = announcements.find((a) => a.id === id);
+              if (found) setSelectedAnnouncementForDetail(found);
             }
           }}
           searchQuery={globalSearchQuery}
@@ -341,6 +397,7 @@ export default function App() {
               onOpenCreateEvent={() => setIsCreateEventOpen(true)}
               onSelectMember={handleSelectMemberById}
               onSelectEvent={(event) => setSelectedEventForDetail(event)}
+              onSelectAnnouncement={(ann) => setSelectedAnnouncementForDetail(ann)}
             />
           )}
 
@@ -434,6 +491,7 @@ export default function App() {
               announcements={announcements}
               onOpenCreateAnnouncement={() => setIsCreateAnnouncementOpen(true)}
               departments={departmentsList}
+              onSelectAnnouncement={(ann) => setSelectedAnnouncementForDetail(ann)}
             />
           )}
 
@@ -527,6 +585,12 @@ export default function App() {
           setSelectedEventForDetail(null);
           setSelectedMember(member);
         }}
+      />
+
+      <AnnouncementDetailModal
+        announcement={selectedAnnouncementForDetail}
+        isOpen={Boolean(selectedAnnouncementForDetail)}
+        onClose={() => setSelectedAnnouncementForDetail(null)}
       />
     </div>
   );

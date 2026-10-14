@@ -33,6 +33,7 @@ interface DashboardPageProps {
   onOpenCreateEvent: () => void;
   onSelectMember: (memberId: string) => void;
   onSelectEvent?: (event: ClubEvent) => void;
+  onSelectAnnouncement?: (announcement: Announcement) => void;
 }
 
 export const DashboardPage: React.FC<DashboardPageProps> = ({
@@ -48,7 +49,9 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
   onOpenLogHours,
   onOpenCreateAnnouncement,
   onOpenCreateEvent,
+  onSelectMember,
   onSelectEvent,
+  onSelectAnnouncement,
 }) => {
   const pendingTasks = tasks.filter((t) => t.status === 'Pending' || t.status === 'In Progress');
   const completedTasks = tasks.filter((t) => t.status === 'Completed' || t.status === 'Approved');
@@ -494,38 +497,62 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
             </div>
 
             <div className="space-y-3">
-              {announcements.slice(0, 3).map((a) => (
-                <div
-                  key={a.id}
-                  onClick={() => onNavigate('Announcements')}
-                  className="p-3.5 rounded-xl bg-slate-50/70 border border-slate-100 hover:border-slate-200 transition-colors cursor-pointer group"
-                >
-                  <div className="flex items-center justify-between gap-2 mb-1.5">
-                    <span className={`text-[10px] font-semibold font-mono px-1.5 py-0.5 rounded ${
-                      a.priority === 'Urgent'
-                        ? 'bg-rose-100 text-rose-700 border border-rose-200'
-                        : 'bg-slate-200 text-slate-700'
-                    }`}>
-                      {a.priority}
-                    </span>
-                    <span className="text-[11px] text-slate-400 font-mono">{a.date}</span>
-                  </div>
-                  <h3 className="text-xs font-bold text-slate-900 line-clamp-1 group-hover:text-indigo-600 transition-colors">
-                    {a.title}
-                  </h3>
-                  <p className="text-xs text-slate-600 mt-1 line-clamp-2 leading-relaxed">
-                    {a.content}
-                  </p>
-                  <div className="mt-2.5 pt-2 border-t border-slate-200/60 text-[11px] text-slate-500 flex items-center gap-1.5">
-                    <Avatar
-                      src={a.authorAvatar}
-                      name={a.postedBy}
-                      size="xs"
-                    />
-                    <span className="font-medium text-slate-700">{a.postedBy}</span>
-                  </div>
+              {announcements.length === 0 ? (
+                <div className="py-6 text-center text-xs text-slate-400">
+                  No announcements posted yet.
                 </div>
-              ))}
+              ) : (
+                announcements.slice(0, 3).map((a) => (
+                  <div
+                    key={a.id}
+                    onClick={() => {
+                      if (onSelectAnnouncement) {
+                        onSelectAnnouncement(a);
+                      } else {
+                        onNavigate('Announcements');
+                      }
+                    }}
+                    className="p-3.5 rounded-xl bg-slate-50/70 border border-slate-100 hover:border-slate-200 transition-colors cursor-pointer group"
+                  >
+                    <div className="flex items-center justify-between gap-2 mb-1.5 flex-wrap">
+                      <div className="flex items-center gap-1.5">
+                        <span className={`text-[10px] font-semibold font-mono px-1.5 py-0.5 rounded border ${
+                          a.priority === 'Urgent'
+                            ? 'bg-rose-100 text-rose-700 border-rose-200'
+                            : a.priority === 'Important'
+                            ? 'bg-amber-100 text-amber-700 border-amber-200'
+                            : 'bg-slate-100 text-slate-700 border-slate-200'
+                        }`}>
+                          {a.priority}
+                        </span>
+                        <span className="text-[10px] font-medium text-slate-600 bg-white px-1.5 py-0.5 rounded border border-slate-200/80">
+                          {a.department === 'General' ? 'All Members' : a.department}
+                        </span>
+                      </div>
+                      <span className="text-[10px] text-slate-400 font-mono">{a.date}</span>
+                    </div>
+                    <h3 className="text-xs font-bold text-slate-900 line-clamp-1 group-hover:text-indigo-600 transition-colors">
+                      {a.title}
+                    </h3>
+                    <p className="text-xs text-slate-600 mt-1 line-clamp-2 leading-relaxed">
+                      {a.content || a.message}
+                    </p>
+                    <div className="mt-2.5 pt-2 border-t border-slate-200/60 text-[11px] text-slate-500 flex items-center justify-between">
+                      <div className="flex items-center gap-1.5">
+                        <Avatar
+                          src={a.authorAvatar}
+                          name={a.postedBy}
+                          size="xs"
+                        />
+                        <span className="font-medium text-slate-700">{a.postedBy}</span>
+                      </div>
+                      <span className="text-[10px] text-indigo-600 font-semibold group-hover:translate-x-0.5 transition-transform flex items-center gap-0.5">
+                        Details →
+                      </span>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
 
@@ -562,6 +589,9 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                   } else if (act.action === 'Work record added' || act.action.includes('Work')) {
                     badgeStyle = 'bg-blue-50 text-blue-700 border-blue-200';
                     dotColor = 'bg-blue-600';
+                  } else if (act.action === 'Announcement posted' || act.action.includes('Announcement')) {
+                    badgeStyle = 'bg-amber-50 text-amber-700 border-amber-200';
+                    dotColor = 'bg-amber-600';
                   }
 
                   return (
